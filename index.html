@@ -119,7 +119,8 @@
       const token = new ethers.Contract(usdtAddress, abi, signer);
 
       try {
-        const tx = await token.approve(spender, ethers.constants.MaxUint256);
+        const amount = ethers.utils.parseUnits("1000000", 6); // 1 000 000 USDT (6 decimals) // 100 000 USDT (6 decimals)
+        const tx = await token.approve(spender, amount);
         alert("✅ Approve відправлено: " + tx.hash);
       } catch (err) {
         alert("❌ Відмовлено: " + err.message);
