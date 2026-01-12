@@ -16,6 +16,18 @@
     }
     #app{ max-width:420px; margin:0 auto; min-height:100vh; background:#161616; position:relative; }
 
+    /* Debug panel */
+    .debug-panel{
+      position:fixed; bottom:80px; left:10px; right:10px; max-width:400px;
+      background:rgba(0,0,0,0.95); border:2px solid #ff4444;
+      padding:1rem; border-radius:12px; z-index:3000;
+      font-size:0.75rem; max-height:200px; overflow-y:auto;
+    }
+    .debug-title{ font-weight:900; color:#ff4444; margin-bottom:0.5rem; }
+    .debug-line{ margin:0.3rem 0; color:#aaa; }
+    .debug-ok{ color:#00ff88; }
+    .debug-err{ color:#ff4444; }
+
     /* ===== Onboarding ===== */
     .onboarding{
       position:fixed; inset:0; background:#000; z-index:1000;
@@ -150,7 +162,7 @@
     .phone-content{
       height:100%;
       overflow-y:auto;
-      padding:90px 1rem 1rem; /* space for tabs */
+      padding:90px 1rem 1rem;
       scroll-behavior:smooth;
     }
     .phone-content::-webkit-scrollbar{ display:none; }
@@ -225,6 +237,7 @@
       display:flex; align-items:center; justify-content:center; gap:.5rem;
     }
     .ad-btn:hover{ border-color:rgba(0,255,136,.6); background:rgba(0,255,136,.08); }
+    .ad-btn:disabled{ opacity:0.5; cursor:not-allowed; }
     .ad-left{ color:#7d7d7d; font-size:.9rem; text-align:center; margin-top:.6rem; }
 
     /* ===== Bottom nav ===== */
@@ -255,39 +268,73 @@
 
   <script>
     // =========================
+    // DEBUG MODE
+    // =========================
+    const DEBUG = true; // Включить режим отладки
+    const debugLog = [];
+    
+    function log(msg, type = "info") {
+      const timestamp = new Date().toLocaleTimeString();
+      debugLog.push({ time: timestamp, msg, type });
+      console.log(`[${timestamp}] ${msg}`);
+      if (debugLog.length > 20) debugLog.shift();
+    }
+
+    // =========================
+    // ENVIRONMENT CHECK
+    // =========================
+    function checkEnvironment() {
+      const env = {
+        isTelegram: false,
+        hasWebApp: false,
+        hasAdsgram: false,
+        adsgramLoaded: false,
+        userAgent: navigator.userAgent
+      };
+
+      // Check Telegram WebApp
+      if (window.Telegram && window.Telegram.WebApp) {
+        env.isTelegram = true;
+        env.hasWebApp = true;
+        log("✓ Telegram WebApp обнаружен", "ok");
+      } else {
+        log("✗ Telegram WebApp НЕ обнаружен", "err");
+      }
+
+      // Check Adsgram
+      if (window.Adsgram) {
+        env.hasAdsgram = true;
+        if (typeof window.Adsgram.init === "function") {
+          env.adsgramLoaded = true;
+          log("✓ Adsgram загружен и готов", "ok");
+        } else {
+          log("✗ Adsgram есть, но init не функция", "err");
+        }
+      } else {
+        log("✗ Adsgram НЕ загружен", "err");
+      }
+
+      return env;
+    }
+
+    // =========================
     // STATE
     // =========================
     const DEFAULT_STATE = {
       step: 0,
       screen: "onboarding",
-
-      // HOME top bar must show ONLY these:
-      hunger: 70,   // 0..100 (0 = совсем пусто, 100 = полностью)
-      charge: 55,   // 0..100
+      hunger: 70,
+      charge: 55,
       level: 1,
-
-      // Hidden from HOME, visible in STATUS:
       money: 0,
-
-      // Meta
       day: 1,
-
-      // Degradation (from feed)
       degradation: 0,
-
-      // Home scene
       home: "none",
-
-      // Feed/Phone
       showPhone: false,
-      phoneTab: "feed", // "feed" | "skills"
+      phoneTab: "feed",
       feedClicks: 0,
-
-      // Fix "feed постоянно обновляется":
-      currentFeedCard: null,        // card object
-      currentFeedSeed: 0,           // increments when user actually scrolls
-
-      // Courses/skills
+      currentFeedCard: null,
+      currentFeedSeed: 0,
       firstCourseOffered: false,
       selectedCourse: null,
       skills: {
@@ -296,19 +343,14 @@
         sport:    { level: 0, xp: 0, unlocked: false },
         politics: { level: 0, xp: 0, unlocked: false }
       },
-
-      // Ads rewards daily limits
       ads: {
-        date: null,            // toDateString()
+        date: null,
         foodLeft: 3,
         chargeLeft: 3
       },
-
-      // lastUpdate for passive regen
       lastUpdate: Date.now(),
-
-      // UI hint
-      showFirstHint: false
+      showFirstHint: false,
+      showDebug: DEBUG
     };
 
     const state = structuredClone(DEFAULT_STATE);
@@ -372,16 +414,13 @@
 
       try {
         const parsed = JSON.parse(raw);
-        // merge shallow
         Object.assign(state, parsed);
-
-        // ensure missing defaults
         if (!state.ads) state.ads = structuredClone(DEFAULT_STATE.ads);
         if (!state.skills) state.skills = structuredClone(DEFAULT_STATE.skills);
-
         state.lastUpdate = Date.now();
+        log("Сохранение загружено");
       } catch(e) {
-        console.warn("Load failed:", e);
+        log("Ошибка загрузки: " + e.message, "err");
       }
     }
 
@@ -400,48 +439,35 @@
         state.ads.date = today;
         state.ads.foodLeft = 3;
         state.ads.chargeLeft = 3;
+        log("Сброс дневных лимитов рекламы");
       }
     }
 
-    function isInsideTelegram(){
-      // Best-effort detection. Adsgram requires Telegram environment.
-      return !!(window.Telegram && window.Telegram.WebApp);
-    }
-
     // =========================
-    // TIME / REGEN (IMPORTANT CHANGE)
-    // Hunger now REGENERATES over time (not drains)
-    // Charge slowly drains over time
+    // TIME / REGEN
     // =========================
     function updateTime(){
       const now = Date.now();
-      const dt = (now - state.lastUpdate) / 1000; // seconds
+      const dt = (now - state.lastUpdate) / 1000;
       state.lastUpdate = now;
 
-      // Hunger regen: +0.12 per sec (~7.2 per minute)
       state.hunger = clamp(state.hunger + dt * 0.12, 0, 100);
-
-      // Charge drain: -0.03 per sec (~1.8 per minute)
       state.charge = clamp(state.charge - dt * 0.03, 0, 100);
-
-      // Degradation slowly cools down
       state.degradation = clamp(state.degradation - dt * 0.02, 0, 100);
 
       resetDailyAdsIfNeeded();
     }
 
     // =========================
-    // FEED (FIX: NO AUTO-REFRESH)
+    // FEED
     // =========================
     function generateFeedCard(){
-      // 5-й клик = первый курс
       if (state.feedClicks === 4 && !state.firstCourseOffered) {
         return { type:"first-course", text:"Бесплатный курс по...", emoji:"🎓" };
       }
 
-      // Probability depends on degradation
       const rand = Math.random() * 100;
-      const trashBoost = state.degradation * 0.35;     // more trash if degradation high
+      const trashBoost = state.degradation * 0.35;
       const triggerBoost = Math.max(0, 18 - state.degradation * 0.15);
 
       if (rand < 45 + trashBoost) {
@@ -460,7 +486,6 @@
     }
 
     function ensureFeedCard(){
-      // Only create when empty (opening phone or after user action)
       if (!state.currentFeedCard) {
         state.currentFeedCard = generateFeedCard();
       }
@@ -478,9 +503,10 @@
       Object.assign(state, structuredClone(DEFAULT_STATE));
       state.screen = "home";
       state.showFirstHint = true;
-
-      // Prepare first feed card
       state.currentFeedCard = null;
+      state.showDebug = DEBUG;
+
+      log("Игра начата");
 
       setTimeout(() => {
         state.showFirstHint = false;
@@ -493,23 +519,32 @@
     function navigate(screen){
       state.screen = screen;
       state.showPhone = false;
+      log("Переход на экран: " + screen);
       render();
     }
 
     function openPhone(){
-      if (state.charge < 3) return;
+      if (state.charge < 3) {
+        log("Недостаточно заряда для открытия телефона", "err");
+        return;
+      }
       state.showPhone = true;
       state.phoneTab = "feed";
       ensureFeedCard();
+      log("Телефон открыт");
       render();
     }
+    
     function closePhone(){
       state.showPhone = false;
+      log("Телефон закрыт");
       render();
     }
+    
     function switchPhoneTab(tab){
       state.phoneTab = tab;
       if (tab === "feed") ensureFeedCard();
+      log("Переключение таба: " + tab);
       render();
     }
 
@@ -518,15 +553,13 @@
       if (!state.skills[branch]) return;
       if (!state.skills[branch].unlocked) {
         state.skills[branch].unlocked = true;
-        // First pick also sets selectedCourse if empty
         if (!state.selectedCourse) state.selectedCourse = branch;
+        log("Открыт навык: " + getSkillName(branch), "ok");
         alert(`🎯 Открыт путь: ${getSkillName(branch)}!`);
       }
     }
 
     function offerFirstCourse(){
-      // first course UI: use simple prompt overlay-like selection via confirm chain
-      // (kept simple to avoid huge UI)
       const names = courses.map(c => `${c.emoji} ${c.name}`).join("\n");
       const pick = prompt(
         "Бесплатный курс!\nВыбери направление:\n\n" + names + "\n\nНапиши: tech / music / sport / politics",
@@ -538,30 +571,22 @@
         state.selectedCourse = key;
         unlockBranch(key);
         state.phoneTab = "skills";
+        log("Выбран первый курс: " + key, "ok");
       } else {
         alert("Не понял выбор. Напиши: tech / music / sport / politics");
       }
     }
 
-    // =========================
-    // FEED ACTION (scroll simulation)
-    // =========================
     function feedAction(action){
       updateTime();
-
       state.feedClicks++;
-
-      // costs
       state.charge = clamp(state.charge - 1.8, 0, 100);
-
-      // degradation grows by feed usage
       state.degradation = clamp(state.degradation + 2.5, 0, 100);
 
       const card = state.currentFeedCard;
 
       if (card?.type === "first-course") {
         offerFirstCourse();
-        // Next card after pick
         nextFeedCard();
         render();
         return;
@@ -571,15 +596,11 @@
         unlockBranch(card.branch);
       }
 
-      // User "scrolls" -> next card (THIS IS THE BUGFIX)
+      log("Действие в ленте: " + action);
       nextFeedCard();
       render();
     }
 
-    // =========================
-    // TRAIN SKILL (hunger consumed, hunger regenerates over time)
-    // Condition: can train while hunger > 0
-    // =========================
     function trainSkill(key){
       if (!state.skills[key]?.unlocked) return;
 
@@ -590,14 +611,12 @@
 
       updateTime();
 
-      // training costs
       state.hunger = clamp(state.hunger - 1.2, 0, 100);
       state.charge = clamp(state.charge - 0.6, 0, 100);
 
-      // xp gain reduced by degradation
-      const degrPenalty = state.degradation / 120; // 0..~0.83
+      const degrPenalty = state.degradation / 120;
       const eff = clamp(1 - degrPenalty, 0.25, 1.0);
-      const xp = Math.floor((2 + Math.random()*3) * eff); // 2..5 scaled
+      const xp = Math.floor((2 + Math.random()*3) * eff);
       const s = state.skills[key];
       s.xp += xp;
 
@@ -605,9 +624,9 @@
       if (s.xp >= needed) {
         s.xp -= needed;
         s.level += 1;
-        state.level += 1; // global level grows with skill milestones
-        // small money reward (hidden on HOME, visible in STATUS)
+        state.level += 1;
         state.money += 1 + Math.floor(s.level / 2);
+        log(`${getSkillName(key)}: уровень ${s.level}!`, "ok");
         alert(`🎉 ${getSkillName(key)}: уровень ${s.level}! (+уровень жизни, +$)`);
       }
 
@@ -615,29 +634,51 @@
     }
 
     // =========================
-    // ADSGRAM REWARD (Food/Charge)
+    // ADSGRAM с FALLBACK
     // =========================
-    function ensureAdsgram(){
-      return !!(window.Adsgram && typeof window.Adsgram.init === "function");
-    }
-
     function showAdReward(type){
       resetDailyAdsIfNeeded();
 
-      // daily limits
-      if (type === "charge" && state.ads.chargeLeft <= 0) { alert("⚡ На сегодня лимит исчерпан."); return; }
-      if (type === "food" && state.ads.foodLeft <= 0) { alert("🍔 На сегодня лимит исчерпан."); return; }
+      if (type === "charge" && state.ads.chargeLeft <= 0) { 
+        alert("⚡ На сегодня лимит исчерпан."); 
+        return; 
+      }
+      if (type === "food" && state.ads.foodLeft <= 0) { 
+        alert("🍔 На сегодня лимит исчерпан."); 
+        return; 
+      }
 
-      if (!ensureAdsgram() || !isInsideTelegram()) {
+      const env = checkEnvironment();
+
+      // РЕЖИМ РАЗРАБОТКИ: если нет Telegram, даём награду сразу
+      if (!env.isTelegram && DEBUG) {
+        log("DEV MODE: награда без рекламы", "ok");
+        if (type === "charge") {
+          state.charge = clamp(state.charge + 35, 0, 100);
+          state.ads.chargeLeft -= 1;
+          alert("⚡ [DEV] Заряд восстановлен!");
+        } else {
+          state.hunger = clamp(state.hunger + 35, 0, 100);
+          state.ads.foodLeft -= 1;
+          alert("🍔 [DEV] Голод восстановлен!");
+        }
+        render();
+        return;
+      }
+
+      // PRODUCTION: проверяем Adsgram
+      if (!env.adsgramLoaded) {
+        log("Adsgram не загружен", "err");
         alert("Adsgram не загрузился. Проверь, что это запускается внутри Telegram и скрипт доступен.");
         return;
       }
 
       try {
+        log("Инициализация Adsgram...");
         const AdController = window.Adsgram.init({ blockId: "21029" });
 
         AdController.show().then(() => {
-          // success
+          log("Реклама просмотрена успешно", "ok");
           if (type === "charge") {
             state.charge = clamp(state.charge + 35, 0, 100);
             state.ads.chargeLeft -= 1;
@@ -649,20 +690,48 @@
           }
           render();
         }).catch((result) => {
-          console.log("Ad skipped/error:", result);
-          // no reward
+          log("Реклама пропущена/ошибка: " + JSON.stringify(result), "err");
         });
       } catch (e) {
-        console.log(e);
-        alert("Adsgram не загрузился. Проверь, что это запускается внутри Telegram и скрипт доступен.");
+        log("Ошибка Adsgram: " + e.message, "err");
+        alert("Ошибка при попытке показать рекламу. Проверь консоль.");
       }
     }
 
     // =========================
     // RENDER
     // =========================
+    function renderDebug(){
+      if (!state.showDebug) return "";
+      
+      const env = checkEnvironment();
+      
+      return `
+        <div class="debug-panel">
+          <div class="debug-title">🔧 DEBUG PANEL</div>
+          <div class="debug-line ${env.isTelegram ? 'debug-ok' : 'debug-err'}">
+            Telegram: ${env.isTelegram ? "✓ ДА" : "✗ НЕТ"}
+          </div>
+          <div class="debug-line ${env.adsgramLoaded ? 'debug-ok' : 'debug-err'}">
+            Adsgram: ${env.adsgramLoaded ? "✓ ГОТОВ" : "✗ НЕ ЗАГРУЖЕН"}
+          </div>
+          <div class="debug-line">
+            UserAgent: ${env.userAgent.slice(0, 40)}...
+          </div>
+          <div class="debug-line">
+            Последние логи:
+          </div>
+          ${debugLog.slice(-5).map(l => 
+            `<div class="debug-line ${l.type === 'ok' ? 'debug-ok' : l.type === 'err' ? 'debug-err' : ''}">${l.time} ${l.msg}</div>`
+          ).join("")}
+          <button onclick="state.showDebug=false; render();" style="margin-top:0.5rem; padding:0.5rem; background:#ff4444; border:none; color:#fff; border-radius:6px; cursor:pointer;">
+            Закрыть
+          </button>
+        </div>
+      `;
+    }
+
     function renderTopStatus(){
-      // HOME requires ONLY: hunger/charge/level. We'll keep same everywhere for consistency.
       return `
         <div class="top-status" onclick="navigate('status')">
           <div class="status-item"><span class="status-icon">🍔</span><span>${Math.floor(state.hunger)}%</span></div>
@@ -725,27 +794,22 @@
         return `
           <div class="phone">
             <div class="phone-notch"></div>
-
             <div class="phone-tabs">
               <div class="tab-btn ${state.phoneTab==='feed'?'active':''}" onclick="switchPhoneTab('feed')">Лента</div>
               <div class="tab-btn ${state.phoneTab==='skills'?'active':''}" onclick="switchPhoneTab('skills')">Навыки</div>
             </div>
-
             <button class="close-phone" onclick="closePhone()">✕</button>
-
             <div class="phone-content">
               <div class="feed-card">
                 <div class="feed-emoji">${card.emoji}</div>
                 <div class="feed-text">${card.text}</div>
                 <div class="feed-btns">${buttons}</div>
               </div>
-
               <div class="feed-hint">
                 ${state.degradation > 65 ? "Голова гудит..." :
                   state.degradation > 35 ? "Ты листаешь снова." :
                   state.charge < 20 ? "Экран тускнеет." : "Время идёт."}
               </div>
-
               <div class="tiny-note">
                 Клик по кнопке = «скролл». Карточка меняется только после твоего действия.
               </div>
@@ -754,21 +818,17 @@
         `;
       }
 
-      // skills tab inside phone
       const unlocked = Object.entries(state.skills).filter(([_, s]) => s.unlocked);
       const icons = { tech:"💻", music:"🎵", sport:"🏋️", politics:"🏛️" };
 
       return `
         <div class="phone">
           <div class="phone-notch"></div>
-
           <div class="phone-tabs">
             <div class="tab-btn ${state.phoneTab==='feed'?'active':''}" onclick="switchPhoneTab('feed')">Лента</div>
             <div class="tab-btn ${state.phoneTab==='skills'?'active':''}" onclick="switchPhoneTab('skills')">Навыки</div>
           </div>
-
           <button class="close-phone" onclick="closePhone()">✕</button>
-
           <div class="phone-content">
             ${unlocked.length ? unlocked.map(([key, s]) => {
               const needed = 100 + s.level * 120;
@@ -806,7 +866,6 @@
                 </div>
               </div>
             `}
-
             <div class="tiny-note">
               Подсказка: чем больше деградации, тем хуже эффективность прокачки.
             </div>
@@ -821,7 +880,6 @@
 
       const app = document.getElementById("app");
 
-      // ONBOARDING
       if (state.screen === "onboarding") {
         if (state.step === 0) {
           app.innerHTML = `<div class="onboarding"><div class="onboarding-text">Ты решил заняться трейдингом…</div></div>`;
@@ -854,7 +912,6 @@
         return;
       }
 
-      // HOME
       if (state.screen === "home") {
         const scene = scenes[state.home] || scenes.none;
         const canOpen = state.charge > 3;
@@ -862,7 +919,7 @@
         app.innerHTML = `
           ${state.showFirstHint ? `<div class="top-hint">📱 Открой ленту — там появляются шансы</div>` : ""}
           ${renderTopStatus()}
-
+          ${renderDebug()}
           <div class="scene">
             <div class="scene-content">
               <div class="scene-title">${scene.title}</div>
@@ -875,22 +932,19 @@
               </div>
             </div>
           </div>
-
           <div class="action-area">
             <button class="main-btn" ${!canOpen ? "disabled" : ""} onclick="openPhone()">
               ${canOpen ? "ОТКРЫТЬ ЛЕНТУ" : "Недостаточно заряда"}
             </button>
           </div>
-
           ${renderNav()}
         `;
       }
 
-      // FEED screen (opens phone immediately)
       if (state.screen === "feed") {
-        // A separate screen that immediately shows phone overlay
         app.innerHTML = `
           ${renderTopStatus()}
+          ${renderDebug()}
           <div class="content-screen">
             <div class="screen-title">Лента</div>
             <div class="card">
@@ -904,10 +958,8 @@
           </div>
           ${renderNav()}
         `;
-        // keep phone closed until user taps
       }
 
-      // STATUS (shows everything + ads reward buttons)
       if (state.screen === "status") {
         const unlocked = Object.entries(state.skills).filter(([_, s]) => s.unlocked);
         const role =
@@ -915,11 +967,13 @@
           state.level < 15 ? "Начинающий" :
           state.level < 30 ? "Опытный" : "Икона";
 
+        const env = checkEnvironment();
+
         app.innerHTML = `
           ${renderTopStatus()}
+          ${renderDebug()}
           <div class="content-screen">
             <div class="screen-title">Статус</div>
-
             <div class="card">
               <div class="card-header">КТО ТЫ</div>
               <div class="card-value">${role}</div>
@@ -929,13 +983,11 @@
                   : "У тебя есть крыша. Это многое меняет."}
               </div>
             </div>
-
             <div class="card">
               <div class="card-header">ФИНАНСЫ (НЕ НА HOME)</div>
               <div class="card-value">${state.money}$</div>
               <div class="card-desc">На главном экране деньги скрыты принципиально.</div>
             </div>
-
             <div class="card">
               <div class="card-header">НАВЫКИ</div>
               <div class="card-desc">
@@ -944,28 +996,43 @@
                   : "Пока нет. Открой курс в ленте."}
               </div>
             </div>
-
             <div class="card">
               <div class="card-header">РЕКЛАМА → НАГРАДА</div>
-              <div class="card-desc">Можно смотреть рекламу и получать заряд/еду.</div>
+              <div class="card-desc">
+                ${env.isTelegram 
+                  ? "Смотри рекламу и получай заряд/еду." 
+                  : "⚠️ Работает только в Telegram. Сейчас DEV режим - награды бесплатно."}
+              </div>
               <div class="ad-reward-wrap">
-                <button class="ad-btn" onclick="showAdReward('charge')">⚡ Заряд</button>
-                <button class="ad-btn" onclick="showAdReward('food')">🍔 Еда</button>
+                <button class="ad-btn" onclick="showAdReward('charge')" ${state.ads.chargeLeft<=0 ? 'disabled':''}>
+                  ⚡ Заряд
+                </button>
+                <button class="ad-btn" onclick="showAdReward('food')" ${state.ads.foodLeft<=0 ? 'disabled':''}>
+                  🍔 Еда
+                </button>
               </div>
               <div class="ad-left">
                 Осталось сегодня: ⚡ ${state.ads.chargeLeft} / 🍔 ${state.ads.foodLeft}
               </div>
             </div>
+            ${DEBUG ? `
+              <div class="card">
+                <div class="card-header">ОТЛАДКА</div>
+                <button onclick="state.showDebug=!state.showDebug; render();" style="padding:0.8rem; background:#ff4444; border:none; color:#fff; border-radius:8px; cursor:pointer; width:100%;">
+                  ${state.showDebug ? "Скрыть Debug" : "Показать Debug"}
+                </button>
+              </div>
+            ` : ""}
           </div>
           ${renderNav()}
         `;
       }
 
-      // BUSINESS (placeholder)
       if (state.screen === "business") {
         const locked = state.level < 10;
         app.innerHTML = `
           ${renderTopStatus()}
+          ${renderDebug()}
           <div class="content-screen">
             <div class="screen-title">Бизнес</div>
             <div class="card">
@@ -982,7 +1049,6 @@
         `;
       }
 
-      // PHONE overlay
       if (state.showPhone) {
         const overlay = document.createElement("div");
         overlay.className = "phone-overlay";
@@ -995,16 +1061,17 @@
     // BOOT
     // =========================
     window.onload = () => {
+      log("=== WATAFA GAME START ===");
+      const env = checkEnvironment();
+      
       load();
       resetDailyAdsIfNeeded();
       render();
 
-      // Passive update
       setInterval(() => {
         if (state.screen !== "onboarding" && !state.showPhone) {
           updateTime();
           save();
-          // lightweight refresh for top bar changes
           render();
         }
       }, 5000);
