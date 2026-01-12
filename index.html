@@ -1,144 +1,579 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>WATAFA GAME</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #0f0f0f;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .stats {
-            position: absolute;
-            top: 20px;
-            text-align: center;
-        }
-
-        .level {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .xp {
-            font-size: 16px;
-            opacity: 0.8;
-        }
-
-        .tap-btn {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #ff0055, #ff8800);
-            border: none;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(255, 0, 100, 0.6);
-            transition: transform 0.05s;
-        }
-
-        .tap-btn:active {
-            transform: scale(0.95);
-        }
-
-        .word {
-            position: absolute;
-            font-size: 32px;
-            font-weight: bold;
-            animation: floatUp 1s ease-out forwards;
-            pointer-events: none;
-        }
-
-        @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(1.4);
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>TapLife</title>
+  <style>
+    :root { --bg:#0b0f19; --card:#121a2a; --mut:#93a4c7; --txt:#e9f0ff; --acc:#4aa3ff; --bad:#ff5b6e; --ok:#35d07f; }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    body{margin:0;background:linear-gradient(180deg,#070a12,#0b0f19);color:var(--txt)}
+    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 90px}
+    .top{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .brand{font-weight:800;letter-spacing:.4px}
+    .pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);padding:6px 10px;border-radius:999px;color:var(--mut);font-size:12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .card{background:rgba(18,26,42,.9);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px}
+    .card h3{margin:0 0 8px;font-size:14px;color:#cfe2ff}
+    .stat{display:flex;align-items:center;justify-content:space-between;margin:6px 0;color:var(--mut);font-size:13px}
+    .bar{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .bar > i{display:block;height:100%;background:var(--acc);width:50%}
+    .bigbtn{width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(74,163,255,.18);color:#eaf4ff;font-weight:800;cursor:pointer}
+    .bigbtn:active{transform:translateY(1px)}
+    .mut{color:var(--mut);font-size:13px;line-height:1.35}
+    .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(10,14,24,.92);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,.08)}
+    .tabs .row{max-width:520px;margin:0 auto;display:flex}
+    .tab{flex:1;padding:10px 6px;text-align:center;color:var(--mut);font-size:12px;cursor:pointer}
+    .tab b{display:block;color:var(--txt);font-size:12px;margin-bottom:2px}
+    .tab.active{color:#cfe2ff}
+    .tab.active b{color:var(--acc)}
+    .hide{display:none}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .row2{display:flex;gap:10px}
+    .btn{flex:1;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--txt);cursor:pointer}
+    .btn.primary{background:rgba(53,208,127,.14)}
+    .btn.bad{background:rgba(255,91,110,.14)}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:var(--mut);font-size:12px}
+    .toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);max-width:520px;width:calc(100% - 28px);background:rgba(18,26,42,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px 12px;color:#dbe9ff;display:none}
+    .toast.show{display:block}
+    .small{font-size:12px;color:var(--mut)}
+  </style>
 </head>
 <body>
+  <div class="toast" id="toast"></div>
 
-<div class="stats">
-    <div class="level">Уровень: <span id="level">1</span></div>
-    <div class="xp">Клики: <span id="xp">0</span></div>
-</div>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">TapLife</div>
+      <div class="pill" id="subtitle">после “слил депозит”</div>
+    </div>
 
-<button class="tap-btn" id="tapBtn">ТАПАЙ</button>
+    <!-- HOME -->
+    <section id="view-home">
+      <div class="card">
+        <h3>Главное</h3>
+        <div class="stat"><span>🍔 Голод</span><span id="hungerTxt"></span></div>
+        <div class="bar"><i id="hungerBar"></i></div>
+
+        <div class="stat" style="margin-top:10px;"><span>🔋 Заряд</span><span id="batteryTxt"></span></div>
+        <div class="bar"><i id="batteryBar"></i></div>
+
+        <div class="stat" style="margin-top:10px;"><span>⭐ Уровень</span><span id="levelTxt"></span></div>
+        <div class="stat"><span>💰 Баланс</span><span id="moneyTxt"></span></div>
+
+        <div class="row2" style="margin-top:10px;">
+          <button class="btn primary" id="btnCafeCharge">⚡ Зарядиться (2/день)</button>
+          <button class="btn primary" id="btnCafeFood">🍜 Поесть (1/день)</button>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:10px;">
+        <div class="card">
+          <h3>Работа (быстро)</h3>
+          <div class="mut">100 кликов → <b id="workPayTxt"></b> (зависит от навыка)</div>
+          <button class="bigbtn" id="btnWorkTap" style="margin-top:10px;">👆 Кликать “работу”</button>
+          <div class="small" style="margin-top:8px;">Прогресс: <span id="workProgTxt">0/100</span></div>
+        </div>
+
+        <div class="card">
+          <h3>Crypto Guess (дневной)</h3>
+          <div class="mut">Угадай направление BTC. Бонусы без ставок.</div>
+          <div class="row2" style="margin-top:10px;">
+            <button class="btn" id="btnGuessUp">⬆ Вверх</button>
+            <button class="btn" id="btnGuessDown">⬇ Вниз</button>
+          </div>
+          <div class="small" style="margin-top:8px;" id="guessStatus"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px;">
+        <h3>Мем-деградация (слова)</h3>
+        <div class="mut">Жми ради мемов. Слова растут по уровню и рандомятся.</div>
+        <button class="bigbtn" id="btnMeme" style="margin-top:10px;">😂 Тапнуть мем</button>
+        <div class="small" style="margin-top:8px;">Выпало: <b id="memeWord">—</b></div>
+      </div>
+    </section>
+
+    <!-- FEED -->
+    <section id="view-feed" class="hide">
+      <div class="list">
+        <div class="card">
+          <h3>Лента</h3>
+          <div class="mut">Здесь рождаются новые возможности. Иногда — шум и мемы.</div>
+          <button class="bigbtn" id="btnScrollFeed" style="margin-top:10px;">🌀 Листать ленту</button>
+          <div class="small" style="margin-top:8px;">Шанс открыть новое задание растёт с навыками.</div>
+        </div>
+        <div class="card">
+          <h3>Событие</h3>
+          <div id="feedEvent" class="mut">Пока тихо. Лента ждёт.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATUS -->
+    <section id="view-status" class="hide">
+      <div class="list">
+        <div class="card">
+          <h3>Кто ты</h3>
+          <div class="mut" id="whoTxt"></div>
+          <div style="margin-top:8px">
+            <span class="tag" id="homeTag"></span>
+            <span class="tag" id="clothTag"></span>
+            <span class="tag" id="cityTag"></span>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Дом</h3>
+            <div class="mut" id="homeTxt"></div>
+            <button class="btn" id="btnUpgradeHome" style="margin-top:10px;">🏠 Улучшить</button>
+          </div>
+          <div class="card">
+            <h3>Одежда</h3>
+            <div class="mut" id="clothTxt"></div>
+            <button class="btn" id="btnUpgradeCloth" style="margin-top:10px;">👕 Улучшить</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Город</h3>
+          <div class="mut" id="cityTxt"></div>
+          <button class="btn" id="btnUpgradeCity" style="margin-top:10px;">🌍 Переехать</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="view-skills" class="hide">
+      <div class="list">
+        <div class="card">
+          <h3>Направления</h3>
+          <div class="mut">Первую ветку выбираешь сразу. Остальные — полноценно после дома.</div>
+        </div>
+
+        <div class="grid" id="skillsGrid"></div>
+
+        <div class="card">
+          <h3>Прокачка</h3>
+          <div class="mut" id="skillActiveTxt">Выбери ветку.</div>
+          <button class="bigbtn" id="btnSkillTap" style="margin-top:10px;">📚 Учиться (клик)</button>
+          <div class="small" style="margin-top:8px;">Этап: <span id="skillStageTxt">0/50</span> • Прогресс: <span id="skillProgTxt">0%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUSINESS (минимально) -->
+    <section id="view-business" class="hide">
+      <div class="list">
+        <div class="card">
+          <h3>Бизнес</h3>
+          <div class="mut">Откроется позже (когда дойдёшь до “иконы” в ветке). Потом тут будет пассив и масштаб.</div>
+          <div class="small" style="margin-top:8px;">Контент можно добавлять еженедельно.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="tabs">
+    <div class="row">
+      <div class="tab active" data-tab="home"><b>Home</b>жизнь</div>
+      <div class="tab" data-tab="feed"><b>Лента</b>хаос</div>
+      <div class="tab" data-tab="skills"><b>Навыки</b>путь</div>
+      <div class="tab" data-tab="status"><b>Статус</b>профиль</div>
+      <div class="tab" data-tab="business"><b>Бизнес</b>пассив</div>
+    </div>
+  </div>
 
 <script>
-    let xp = 0;
-    let level = 1;
+  // ---- STATE ----
+  const STORAGE_KEY = "taplife_state_v1";
 
-    const xpEl = document.getElementById("xp");
-    const levelEl = document.getElementById("level");
-    const btn = document.getElementById("tapBtn");
+  const defaultState = {
+    hunger: 80,
+    battery: 12,
+    level: 1,
+    money: 0,
+    workClicks: 0,
+    // daily limits
+    dayKey: new Date().toISOString().slice(0,10),
+    cafeChargeLeft: 2,
+    cafeFoodLeft: 1,
+    guessDone: false,
+    guessStreakBonus: 0, // extra tries after wins (kept in-day)
+    // social
+    homeTier: 0,   // 0 cardboard, 1 basement, 2 room, 3 flat, 4 house
+    clothTier: 0,  // 0 ragged, 1 simple, 2 norm, 3 status, 4 elite
+    cityTier: 0,   // 0 village, 1 district, 2 small, 3 regional, 4 capital, 5 mega, 6 intl
+    // skills
+    chosenMain: null,
+    activeSkill: null,
+    skills: {
+      tech: { stage:0, prog:0 },
+      music:{ stage:0, prog:0 },
+      sport:{ stage:0, prog:0 },
+      politics:{ stage:0, prog:0 },
+    },
+    // meme words
+    memeLevel: 1
+  };
 
-    function getWordByLevel(level) {
-        if (level === 1) return "ФА";
-        if (level === 2) return "ШНЕЛЯ";
-        if (level === 3) return "ВАТАФА";
-        return "???";
+  function loadState(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    let s = raw ? JSON.parse(raw) : structuredClone(defaultState);
+    // new day reset
+    const today = new Date().toISOString().slice(0,10);
+    if (s.dayKey !== today){
+      s.dayKey = today;
+      s.cafeChargeLeft = 2;
+      s.cafeFoodLeft = 1;
+      s.guessDone = false;
+      s.guessStreakBonus = 0;
+    }
+    return s;
+  }
+  function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  let state = loadState();
+
+  // ---- UI helpers ----
+  const $ = (id)=>document.getElementById(id);
+  function clamp(n,a,b){return Math.max(a,Math.min(b,n));}
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"), 2200);
+  }
+
+  // ---- Game rules ----
+  const HOME_NAMES = ["Картонка", "Подвал", "Комната", "Квартира", "Дом"];
+  const CLOTH_NAMES = ["Рваная", "Простая", "Норм", "Статусная", "Элитная"];
+  const CITY_NAMES  = ["Посёлок", "Райцентр", "Малый город", "Областной", "Столица", "Мегаполис", "Международка"];
+
+  function skillAvg(){
+    const v = Object.values(state.skills).map(x=>x.stage);
+    const sum = v.reduce((a,b)=>a+b,0);
+    return sum / v.length;
+  }
+  function workPay(){
+    // базово от активной ветки: 1$ + floor(stage/10)
+    const k = state.activeSkill || state.chosenMain || "tech";
+    const st = state.skills[k].stage;
+    const base = 1 + Math.floor(st/10);
+    // временный буст от crypto guess
+    const mult = state._workBoostMult ? state._workBoostMult : 1;
+    return Math.round(base * mult);
+  }
+
+  function updateDerived(){
+    // meme levels by overall level
+    state.memeLevel = state.level;
+    // passive small tick effect: hunger slowly rises (worse), battery slowly drops
+    // (простая версия — тики не делаем, чтобы не усложнять)
+  }
+
+  // ---- Render ----
+  function render(){
+    updateDerived();
+
+    $("hungerTxt").textContent = `${state.hunger}%`;
+    $("batteryTxt").textContent = `${state.battery}%`;
+    $("levelTxt").textContent = `${state.level}`;
+    $("moneyTxt").textContent = `$${state.money.toFixed(0)}`;
+    $("hungerBar").style.width = `${clamp(state.hunger,0,100)}%`;
+    $("batteryBar").style.width = `${clamp(state.battery,0,100)}%`;
+    $("workProgTxt").textContent = `${state.workClicks}/100`;
+    $("workPayTxt").textContent = `$${workPay()}`;
+
+    $("btnCafeCharge").textContent = `⚡ Зарядиться (${state.cafeChargeLeft}/день)`;
+    $("btnCafeFood").textContent = `🍜 Поесть (${state.cafeFoodLeft}/день)`;
+
+    // crypto guess
+    if (state.guessDone && state.guessStreakBonus<=0){
+      $("guessStatus").textContent = "Сегодня прогноз уже сделан.";
+    } else if (!state.guessDone){
+      $("guessStatus").textContent = "Доступно 1 раз в день.";
+    } else {
+      $("guessStatus").textContent = `Удача! Можно рискнуть ещё раз: ${state.guessStreakBonus} попытка(и).`;
     }
 
-    function updateLevel() {
-        if (xp >= 20) level = 3;
-        else if (xp >= 10) level = 2;
-        else level = 1;
+    // status
+    $("homeTxt").textContent  = `${HOME_NAMES[state.homeTier]} • аренда: ${rentCost()}$/мес`;
+    $("clothTxt").textContent = `${CLOTH_NAMES[state.clothTier]}`;
+    $("cityTxt").textContent  = `${CITY_NAMES[state.cityTier]}`;
 
-        levelEl.textContent = level;
+    $("homeTag").textContent = `Дом: ${HOME_NAMES[state.homeTier]}`;
+    $("clothTag").textContent = `Одежда: ${CLOTH_NAMES[state.clothTier]}`;
+    $("cityTag").textContent = `Город: ${CITY_NAMES[state.cityTier]}`;
+
+    $("whoTxt").textContent = whoAmI();
+
+    // skills grid
+    renderSkillsGrid();
+
+    // active skill
+    const k = state.activeSkill;
+    if (!k){
+      $("skillActiveTxt").textContent = "Выбери ветку (карточка сверху).";
+      $("skillStageTxt").textContent = `—`;
+      $("skillProgTxt").textContent = `—`;
+    } else {
+      $("skillActiveTxt").textContent = `Активно: ${skillName(k)} (этап ${state.skills[k].stage}/50)`;
+      $("skillStageTxt").textContent = `${state.skills[k].stage}/50`;
+      $("skillProgTxt").textContent = `${state.skills[k].prog}%`;
     }
 
-    function showWord(word) {
-        const el = document.createElement("div");
-        el.className = "word";
-        el.textContent = word;
+    saveState();
+  }
 
-        const x = window.innerWidth / 2 - 30 + (Math.random() * 60 - 30);
-        const y = window.innerHeight / 2 - 30 + (Math.random() * 60 - 30);
+  function rentCost(){
+    // мягкая аренда: 0 для картонки, дальше растёт
+    return [0, 10, 25, 60, 120][state.homeTier] || 0;
+  }
+  function whoAmI(){
+    const lvl = state.level;
+    const ht = state.homeTier;
+    const ct = state.clothTier;
+    if (lvl<=2) return "Ты после слива депозита. Но телефон ещё жив. Значит, шанс есть.";
+    if (ht===0) return "Ты держишься на энтузиазме и розетке в кафе.";
+    if (ht>=2 && ct>=2) return "Ты уже выглядишь как человек из системы. Двери начинают приоткрываться.";
+    return "Ты в пути. Интернет смеётся, но ты растёшь.";
+  }
+  function skillName(k){
+    return ({tech:"Технологии",music:"Музыка",sport:"Спорт",politics:"Политика"})[k] || k;
+  }
 
-        el.style.left = x + "px";
-        el.style.top = y + "px";
-
-        document.body.appendChild(el);
-
-        setTimeout(() => {
-            el.remove();
-        }, 1000);
-    }
-
-    btn.addEventListener("click", () => {
-        xp++;
-        xpEl.textContent = xp;
-
-        updateLevel();
-
-        const word = getWordByLevel(level);
-        showWord(word);
-
-        // лёгкая тряска
-        btn.style.transform = "scale(0.9)";
-        setTimeout(() => {
-            btn.style.transform = "scale(1)";
-        }, 50);
+  function renderSkillsGrid(){
+    const grid = $("skillsGrid");
+    grid.innerHTML = "";
+    const skills = ["tech","music","sport","politics"];
+    skills.forEach(k=>{
+      const locked = isSkillLocked(k);
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${locked ? "🔒 " : ""}${skillName(k)}</h3>
+        <div class="mut">Этап: ${state.skills[k].stage}/50</div>
+        <button class="btn" ${locked ? "disabled" : ""} style="margin-top:10px;opacity:${locked?0.5:1}">
+          ${state.activeSkill===k ? "✅ Выбрано" : "Выбрать"}
+        </button>
+        <div class="small" style="margin-top:8px;">${locked ? lockReason() : "Можно качать."}</div>
+      `;
+      card.querySelector("button").onclick = ()=> {
+        if (locked) return toast(lockReason());
+        state.activeSkill = k;
+        if (!state.chosenMain) state.chosenMain = k;
+        toast(`Путь: ${skillName(k)}.`);
+        render();
+      };
+      grid.appendChild(card);
     });
-</script>
+  }
 
+  function isSkillLocked(k){
+    // первая ветка доступна всегда, остальные — после дома >= 1 (подвал)
+    if (!state.chosenMain) return false;
+    if (k === state.chosenMain) return false;
+    return state.homeTier < 1;
+  }
+  function lockReason(){
+    return "Нужно хотя бы жильё уровня “Подвал”, чтобы нормально развиваться в нескольких направлениях.";
+  }
+
+  // ---- Actions ----
+  $("btnCafeCharge").onclick = ()=>{
+    if (state.cafeChargeLeft<=0) return toast("Сегодня в кафе уже косо смотрят 😅");
+    state.cafeChargeLeft--;
+    state.battery = 100;
+    toast("Телефон заряжен. Живём.");
+    render();
+  };
+  $("btnCafeFood").onclick = ()=>{
+    if (state.cafeFoodLeft<=0) return toast("Сегодня бесплатной еды уже не дадут 🙃");
+    state.cafeFoodLeft--;
+    state.hunger = clamp(state.hunger - 60, 0, 100);
+    toast("Поел. Мозги включаются.");
+    render();
+  };
+
+  $("btnWorkTap").onclick = ()=>{
+    if (state.battery<=0) return toast("Телефон сел. Иронично.");
+    if (state.hunger>=95) toast("Голод мешает. Но ты упрямый.");
+
+    state.workClicks++;
+    // cost
+    state.battery = clamp(state.battery - 1, 0, 100);
+    state.hunger = clamp(state.hunger + 0.6, 0, 100);
+
+    if (state.workClicks>=100){
+      state.workClicks = 0;
+      const gain = workPay();
+      state.money += gain;
+      state.level += 1;
+      toast(`Готово! +$${gain} • Уровень +1`);
+    }
+    render();
+  };
+
+  // Meme word button
+  const WORD_LEVELS = [
+    ["Фа"],                 // lvl 1
+    ["Фа","ПЭПЭ"],          // lvl 2+
+    ["Фа","ПЭПЭ","Шнеля"],  // lvl 3+
+    ["Фа","ПЭПЭ","Шнеля","Ватафа"] // lvl 4+
+  ];
+  $("btnMeme").onclick = ()=>{
+    const lvl = state.level;
+    let arr = WORD_LEVELS[0];
+    if (lvl>=2) arr = WORD_LEVELS[1];
+    if (lvl>=3) arr = WORD_LEVELS[2];
+    if (lvl>=4) arr = WORD_LEVELS[3];
+
+    const w = arr[Math.floor(Math.random()*arr.length)];
+    $("memeWord").textContent = w;
+    // tiny playful effects (no harsh punishment)
+    state.hunger = clamp(state.hunger + 0.5, 0, 100);
+    render();
+  };
+
+  // Crypto Guess (no betting)
+  function rollBonusMult(){
+    // 5% x2, 3% x3, 0.001% x10 else x1
+    const r = Math.random()*100;
+    if (r < 0.001) return 10;
+    if (r < 3.001) return 3;
+    if (r < 8.001) return 2;
+    return 1;
+  }
+  function doGuess(choice){
+    // allowed if not done OR streak bonus >0
+    if (state.guessDone && state.guessStreakBonus<=0) return toast("Сегодня уже достаточно трейдинга 😄");
+    // resolve direction randomly for now (в проде можно привязать к реальному API позже)
+    const dir = Math.random() < 0.5 ? "up" : "down";
+    const ok = (choice === dir);
+
+    if (!state.guessDone) state.guessDone = true;
+    else state.guessStreakBonus = Math.max(0, state.guessStreakBonus - 1);
+
+    if (ok){
+      const mult = rollBonusMult();
+      // set temporary work multiplier for today
+      state._workBoostMult = mult;
+      // allow extra try
+      state.guessStreakBonus += 1;
+
+      if (mult === 10) toast("ЛЕГЕНДА! x10 к заработку (на сегодня) 🔥");
+      else if (mult === 3) toast("Красиво! x3 к заработку (на сегодня) 😎");
+      else if (mult === 2) toast("Неплохо! x2 к заработку (на сегодня) 🙂");
+      else toast("Угадал! Буст активирован + можно ещё раз 😉");
+    } else {
+      // мягко: без потерь
+      state._workBoostMult = 1;
+      toast("Не угадал. Рынок снова сделал вид, что он главный 🙃");
+    }
+    render();
+  }
+  $("btnGuessUp").onclick = ()=>doGuess("up");
+  $("btnGuessDown").onclick = ()=>doGuess("down");
+
+  // Feed
+  $("btnScrollFeed").onclick = ()=>{
+    if (state.battery<=0) return toast("Телефон сел прямо на ленте. Классика.");
+    state.battery = clamp(state.battery - 1, 0, 100);
+
+    // шанс события растёт с средним скиллом
+    const p = 0.20 + (skillAvg()/100); // до ~0.70
+    const r = Math.random();
+
+    let msg = "";
+    if (r < p){
+      // open “new task” (soft)
+      const themes = [
+        "Нашёлся бесплатный курс. Мозг получил +1 к уверенности.",
+        "Кто-то ищет исполнителя. Открылось новое задание (в будущем расширим).",
+        "Тебе написали: “Есть работа, но нужен статус”.",
+        "Случайный инсайд: “Новая тема в тренде”."
+      ];
+      msg = themes[Math.floor(Math.random()*themes.length)];
+      // tiny reward
+      state.level += 1;
+    } else {
+      const memes = [
+        "Лента: “Купи курс и станешь миллионером за 7 дней”. Ты: 😐",
+        "Лента: “Срочный сигнал! 100%”. Ты: “я уже видел…”",
+        "Лента: “мотивация утром”. Ты: “ладно, завтра”",
+        "Лента: “почему ты ещё не легенда?”. Ты: “заряд 3%”"
+      ];
+      msg = memes[Math.floor(Math.random()*memes.length)];
+    }
+    $("feedEvent").textContent = msg;
+    render();
+  };
+
+  // Status upgrades (simple)
+  $("btnUpgradeHome").onclick = ()=>{
+    const costs = [0, 15, 40, 120, 250];
+    const next = Math.min(4, state.homeTier+1);
+    if (next===state.homeTier) return toast("Дом уже максимально прокачан (пока).");
+    const cost = costs[next];
+    if (state.money < cost) return toast(`Нужно $${cost} для улучшения жилья.`);
+    state.money -= cost;
+    state.homeTier = next;
+    toast(`Жильё улучшено: ${HOME_NAMES[state.homeTier]}`);
+    render();
+  };
+
+  $("btnUpgradeCloth").onclick = ()=>{
+    const costs = [0, 10, 35, 90, 200];
+    const next = Math.min(4, state.clothTier+1);
+    if (next===state.clothTier) return toast("Одежда уже топ (пока).");
+    const cost = costs[next];
+    if (state.money < cost) return toast(`Нужно $${cost} на одежду.`);
+    state.money -= cost;
+    state.clothTier = next;
+    toast(`Одежда: ${CLOTH_NAMES[state.clothTier]}`);
+    render();
+  };
+
+  $("btnUpgradeCity").onclick = ()=>{
+    const costs = [0, 10, 25, 60, 150, 300, 600];
+    const next = Math.min(6, state.cityTier+1);
+    if (next===state.cityTier) return toast("Ты уже на вершине географии (пока).");
+    // soft requirements
+    if (state.homeTier < Math.min(3, next)) return toast("Для переезда нужен дом получше.");
+    if (state.clothTier < Math.min(2, next)) return toast("Для переезда нужна одежда получше.");
+    const cost = costs[next];
+    if (state.money < cost) return toast(`Переезд стоит $${cost}.`);
+    state.money -= cost;
+    state.cityTier = next;
+    toast(`Переезд: ${CITY_NAMES[state.cityTier]}`);
+    render();
+  };
+
+  // Tabs
+  const views = {
+    home: $("view-home"),
+    feed: $("view-feed"),
+    skills: $("view-skills"),
+    status: $("view-status"),
+    business: $("view-business"),
+  };
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.onclick = ()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      const name = t.dataset.tab;
+      Object.entries(views).forEach(([k,el])=> el.classList.toggle("hide", k!==name));
+    };
+  });
+
+  // Init: choose main skill if none
+  if (!state.chosenMain){
+    state.activeSkill = "tech";
+    state.chosenMain = null; // will set on first choose
+  }
+  render();
+</script>
 </body>
 </html>
