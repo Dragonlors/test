@@ -95,7 +95,79 @@
             transform: scale(0.95);
         }
         
-        /* Верхний статус - ВСЕГДА ВИДЕН */
+        /* Обучающий экран */
+        .tutorial-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .tutorial-box {
+            background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 360px;
+            width: 100%;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+        }
+        
+        .tutorial-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tutorial-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #00ff88;
+        }
+        
+        .tutorial-text {
+            font-size: 1rem;
+            color: #ddd;
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        
+        .tutorial-highlight {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid #00ff88;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .tutorial-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+        }
+        
+        .tutorial-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Верхний статус */
         .top-status {
             position: fixed;
             top: 1rem;
@@ -131,9 +203,63 @@
             font-size: 0.95rem;
         }
         
+        /* Действия и день */
+        .top-actions {
+            position: fixed;
+            top: 4.5rem;
+            right: 1rem;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            background: rgba(31, 31, 31, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover:not(:disabled) {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .action-btn.cooldown {
+            font-size: 0.7rem;
+            color: #888;
+        }
+        
+        .day-counter {
+            background: rgba(31, 31, 31, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
         /* Сцена с фото */
         .scene {
             min-height: 100vh;
+            background-image: url('https://dragonlors.github.io/test/image/fon1.png');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -148,7 +274,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%);
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
             z-index: 1;
         }
         
@@ -168,7 +294,7 @@
         
         .scene-desc {
             font-size: 1.05rem;
-            color: #ddd;
+            color: #fff;
             line-height: 1.6;
             margin-bottom: 1.5rem;
             text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
@@ -176,12 +302,12 @@
         
         .scene-hint {
             padding: 1rem;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             font-size: 0.95rem;
             font-style: italic;
-            color: #999;
+            color: #ddd;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
@@ -366,6 +492,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.85rem;
         }
         
         .feed-btn:hover {
@@ -465,7 +592,7 @@
             border-radius: 4px;
         }
         
-        .skill-item, .job-item {
+        .skill-item, .job-item, .shop-item {
             margin: 1rem 0;
             padding: 1.2rem;
             background: rgba(0, 255, 136, 0.05);
@@ -475,7 +602,7 @@
             transition: all 0.2s;
         }
         
-        .skill-item:hover, .job-item:hover {
+        .skill-item:hover, .job-item:hover, .shop-item:hover {
             border-color: #00ff88;
             background: rgba(0, 255, 136, 0.1);
         }
@@ -499,6 +626,12 @@
         
         .item-icon {
             font-size: 1.5rem;
+        }
+        
+        .item-price {
+            color: #00ff88;
+            font-weight: 700;
+            font-size: 1.2rem;
         }
         
         .empty-state {
@@ -653,53 +786,6 @@
             font-size: 1.1rem;
         }
         
-        /* Настройки фона */
-        .settings-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        
-        .settings-box {
-            background: #1f1f1f;
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 360px;
-            width: 100%;
-            border: 1px solid #2a2a2a;
-        }
-        
-        .settings-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-        }
-        
-        .settings-item {
-            margin-bottom: 1.5rem;
-        }
-        
-        .settings-label {
-            font-size: 0.9rem;
-            color: #888;
-            margin-bottom: 0.5rem;
-        }
-        
-        .settings-input {
-            width: 100%;
-            padding: 0.8rem;
-            background: #161616;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.9rem;
-        }
-        
         /* Навигация */
         .nav {
             position: fixed;
@@ -768,7 +854,9 @@
             screen: 'onboarding',
             hunger: 80,
             charge: 12,
+            money: 0,
             level: 1,
+            day: 1,
             degradation: 0,
             concentration: 50,
             chaos: 30,
@@ -777,6 +865,9 @@
             currentSkill: null,
             currentJob: null,
             firstCourseOffered: false,
+            showTutorial: false,
+            tutorialStep: 0,
+            selectedCourse: null,
             skills: {
                 tech: { level: 0, xp: 0, unlocked: false },
                 music: { level: 0, xp: 0, unlocked: false },
@@ -789,8 +880,8 @@
             cryptoStreak: 0,
             showPhone: false,
             showCourseSelection: false,
-            showSettings: false,
-            customBackground: '',
+            lastCharge: null,
+            lastEat: null,
             lastUpdate: Date.now()
         };
 
@@ -799,14 +890,12 @@
             none: {
                 title: 'Улица',
                 desc: 'Ты сидишь на картонке у кафе. В руках телефон. Рядом розетка.',
-                hint: 'Заряжаешь телефон и думаешь, что делать дальше.',
-                bg: 'data:image/svg+xml;charset=utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600"%3E%3Cdefs%3E%3ClinearGradient id="a" x1="0" y1="0" x2="0" y2="1"%3E%3Cstop offset="0" stop-color="%23d4a574"/%3E%3Cstop offset="1" stop-color="%23aa7c4f"/%3E%3C/linearGradient%3E%3ClinearGradient id="b" x1="0" y1="0" x2="0" y2="1"%3E%3Cstop offset="0" stop-color="%23ffaa44"/%3E%3Cstop offset="1" stop-color="%23cc6622"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="400" height="600" fill="%23111"/%3E%3Cellipse cx="100" cy="100" rx="30" ry="30" fill="url(%23b)" opacity="0.3"/%3E%3Cellipse cx="300" cy="150" rx="40" ry="40" fill="url(%23b)" opacity="0.2"/%3E%3Cpath d="M 50 400 Q 100 350 150 400 T 250 400" stroke="url(%23a)" fill="none" stroke-width="3" opacity="0.3"/%3E%3Crect x="20" y="450" width="360" height="2" fill="url(%23a)" opacity="0.2"/%3E%3Ccircle cx="200" cy="300" r="60" fill="%23333" opacity="0.5"/%3E%3Crect x="150" y="280" width="30" height="60" fill="%234a4a4a" rx="5"/%3E%3Crect x="220" y="280" width="30" height="60" fill="%234a4a4a" rx="5"/%3E%3Crect x="170" y="360" width="60" height="80" fill="%23555" rx="5"/%3E%3Crect x="340" y="520" width="40" height="60" fill="%23666" rx="3"/%3E%3Cpath d="M 330 550 L 340 520 L 360 540 Z" fill="%23888"/%3E%3Cellipse cx="250" cy="550" rx="80" ry="20" fill="%23222" opacity="0.5"/%3E%3C/svg%3E'
+                hint: 'Заряжаешь телефон и думаешь, что делать дальше.'
             },
             basement: {
                 title: 'Подвал',
                 desc: 'Сырой подвал с лампой. Но это твоё место.',
-                hint: 'Можно спокойно работать и учиться.',
-                bg: 'data:image/svg+xml;charset=utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600"%3E%3Crect width="400" height="600" fill="%230a0a0a"/%3E%3Crect x="50" y="100" width="300" height="400" fill="%23151515" stroke="%23222" stroke-width="2"/%3E%3Cellipse cx="200" cy="150" rx="30" ry="20" fill="%23ffcc44" opacity="0.6"/%3E%3Crect x="100" y="300" width="80" height="120" fill="%23333" rx="5"/%3E%3C/svg%3E'
+                hint: 'Можно спокойно работать и учиться.'
             }
         };
 
@@ -840,10 +929,15 @@
         };
 
         const courses = [
-            { key: 'tech', emoji: '💻', name: 'Основы программирования' },
-            { key: 'music', emoji: '🎵', name: 'Музыкальная теория' },
-            { key: 'sport', emoji: '🏋️', name: 'Фитнес и тренировки' },
-            { key: 'politics', emoji: '🏛️', name: 'Основы политологии' }
+            { key: 'tech', emoji: '💻', name: 'Основы программирования', desc: 'Технологии' },
+            { key: 'music', emoji: '🎵', name: 'Музыкальная теория', desc: 'Музыка' },
+            { key: 'sport', emoji: '🏋️', name: 'Фитнес и тренировки', desc: 'Спорт' },
+            { key: 'politics', emoji: '🏛️', name: 'Основы политологии', desc: 'Политика' }
+        ];
+
+        const shopItems = [
+            { id: 'food', name: 'Еда', emoji: '🍔', price: 5, effect: 'hunger' },
+            { id: 'charge', name: 'Зарядить телефон', emoji: '⚡', price: 3, effect: 'charge' }
         ];
 
         // Утилиты
@@ -864,53 +958,99 @@
             return names[key];
         }
 
+        // Кулдауны
+        function canCharge() {
+            if (!state.lastCharge) return true;
+            const elapsed = Date.now() - state.lastCharge;
+            return elapsed >= 30 * 60 * 1000;
+        }
+
+        function canEat() {
+            if (!state.lastEat) return true;
+            const elapsed = Date.now() - state.lastEat;
+            return elapsed >= 30 * 60 * 1000;
+        }
+
+        function getTimeLeft(lastTime) {
+            const elapsed = Date.now() - lastTime;
+            const remaining = (30 * 60 * 1000) - elapsed;
+            const minutes = Math.ceil(remaining / 60000);
+            return minutes > 0 ? `${minutes}м` : '0м';
+        }
+
+        // Действия
+        function chargePhone() {
+            if (!canCharge()) return;
+            state.charge = 100;
+            state.lastCharge = Date.now();
+            render();
+        }
+
+        function eatFood() {
+            if (!canEat()) return;
+            state.hunger = Math.max(0, state.hunger - 50);
+            state.lastEat = Date.now();
+            render();
+        }
+
+        // Магазин
+        function buyItem(itemId) {
+            const item = shopItems.find(i => i.id === itemId);
+            if (!item || state.money < item.price) {
+                alert('Недостаточно денег!');
+                return;
+            }
+            
+            state.money -= item.price;
+            
+            if (item.effect === 'hunger') {
+                state.hunger = Math.max(0, state.hunger - 50);
+                alert('🍔 Ты поел! Голод снижен.');
+            } else if (item.effect === 'charge') {
+                state.charge = 100;
+                alert('⚡ Телефон заряжен!');
+            }
+            
+            render();
+        }
+
         // Игровое время
         function updateTime() {
             const now = Date.now();
             const delta = (now - state.lastUpdate) / 1000;
             state.lastUpdate = now;
             
-            // Пассивные изменения
-            state.hunger = Math.min(100, state.hunger + delta * 0.3); // Голод растёт медленнее
-            state.charge = Math.max(0, state.charge - delta * 0.2); // Заряд падает медленнее
+            state.hunger = Math.min(100, state.hunger + delta * 0.3);
+            state.charge = Math.max(0, state.charge - delta * 0.2);
             
-            // Восстановление от деградации
             if (state.degradation > 0) {
                 state.degradation = Math.max(0, state.degradation - delta * 0.05);
             }
         }
 
         function generateFeed() {
-            // Первый раз - предлагаем выбор
             if (!state.firstCourseOffered) {
-                state.firstCourseOffered = true;
-                state.showCourseSelection = true;
-                save();
-                render();
-                return null;
+                return {
+                    text: 'Бесплатный курс по...',
+                    emoji: '🎓',
+                    type: 'first-course'
+                };
             }
             
-            // Шансы согласно документу: 50% мусор, 25% нейтрал, 15% триггер, 7% скрытый, 3% сюжет
             const rand = Math.random() * 100;
-            
-            // Модификаторы
-            const trashMod = state.degradation * 0.3; // Больше деградации = больше мусора
-            const triggerMod = Math.max(0, 15 - state.degradation * 0.1); // Меньше деградации = больше триггеров
+            const trashMod = state.degradation * 0.3;
+            const triggerMod = Math.max(0, 15 - state.degradation * 0.1);
             
             if (rand < 50 + trashMod) {
-                // Мусор (50%)
                 const item = feedData.trash[Math.floor(Math.random() * feedData.trash.length)];
                 return { ...item, type: 'trash' };
             } else if (rand < 75 + trashMod) {
-                // Нейтрал (25%)
                 const item = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
                 return { ...item, type: 'neutral' };
             } else if (rand < 90 + trashMod - triggerMod) {
-                // Триггер (15%) - редкий!
                 const item = feedData.triggers[Math.floor(Math.random() * feedData.triggers.length)];
                 return { ...item, type: 'trigger' };
             } else {
-                // Возвращаем нейтрал если не подошло
                 const item = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
                 return { ...item, type: 'neutral' };
             }
@@ -941,25 +1081,47 @@
             render();
         }
 
-        function selectCourse(key) {
-            state.skills[key].unlocked = true;
-            state.currentSkill = key;
-            state.showCourseSelection = false;
-            alert(`🎯 Отличный выбор! Ты начинаешь изучать: ${getSkillName(key)}`);
+        function showFirstTutorial() {
+            state.showTutorial = true;
+            state.tutorialStep = 1;
             render();
+        }
+
+        function selectCourse(key) {
+            state.selectedCourse = key;
+            state.showCourseSelection = false;
+            state.showTutorial = true;
+            state.tutorialStep = 2;
+            render();
+        }
+
+        function completeTutorial() {
+            if (state.tutorialStep === 2) {
+                // Завершаем обучение и открываем навык
+                state.skills[state.selectedCourse].unlocked = true;
+                state.currentSkill = state.selectedCourse;
+                state.firstCourseOffered = true;
+                state.showTutorial = false;
+                state.tutorialStep = 0;
+                closePhone();
+                render();
+            }
         }
 
         function feedAction(action, card) {
             updateTime();
             
-            // Траты ресурсов
+            if (card.type === 'first-course') {
+                showFirstTutorial();
+                return;
+            }
+            
             state.charge = Math.max(0, state.charge - 2);
             state.degradation = Math.min(100, state.degradation + 3);
             state.concentration = Math.max(0, state.concentration - 1);
             state.chaos = Math.min(100, state.chaos + 2);
             
             if (card && card.type === 'trigger' && card.branch) {
-                // Открываем навык только если еще не открыт
                 if (!state.skills[card.branch].unlocked) {
                     state.skills[card.branch].unlocked = true;
                     alert(`🎯 Открыт путь: ${getSkillName(card.branch)}!`);
@@ -980,7 +1142,6 @@
             
             const skill = state.skills[state.currentSkill];
             
-            // Эффективность зависит от деградации и голода
             const degradationPenalty = state.degradation / 150;
             const hungerPenalty = state.hunger / 200;
             const efficiency = Math.max(0.2, 1 - degradationPenalty - hungerPenalty);
@@ -988,17 +1149,22 @@
             const xp = Math.floor((Math.random() * 3 + 2) * efficiency);
             skill.xp += xp;
             
-            // Траты ресурсов при обучении
+            // Деньги за обучение (каждые 10 XP = 1$)
+            const moneyGain = Math.floor(xp / 10);
+            if (moneyGain > 0) {
+                state.money += moneyGain;
+            }
+            
             state.charge = Math.max(0, state.charge - 0.5);
-            state.hunger = Math.min(100, state.hunger + 0.8); // ГОЛОД РАСТЁТ!
+            state.hunger = Math.min(100, state.hunger + 0.8);
             state.fatigue = Math.min(100, state.fatigue + 0.3);
             
             const needed = skill.level * 100 + 100;
             if (skill.xp >= needed) {
                 skill.xp -= needed;
                 skill.level++;
+                state.money += skill.level * 5; // Бонус за уровень
                 
-                // Открываем работы
                 if (skill.level === 3 && state.jobs.length === 0) {
                     state.jobs.push({
                         id: 'moderation',
@@ -1006,9 +1172,9 @@
                         income: 50,
                         skill: state.currentSkill
                     });
-                    alert(`🎉 Уровень ${skill.level}! Открыта работа: Модерация контента`);
+                    alert(`🎉 Уровень ${skill.level}! Открыта работа: Модерация контента (+${skill.level * 5}$)`);
                 } else {
-                    alert(`🎉 Уровень ${skill.level}! ${getSkillName(state.currentSkill)}`);
+                    alert(`🎉 Уровень ${skill.level}! ${getSkillName(state.currentSkill)} (+${skill.level * 5}$)`);
                 }
                 
                 if (skill.level === 5) {
@@ -1027,11 +1193,14 @@
             if (win) {
                 const bonus = Math.random() < 0.05 ? 10 : (Math.random() < 0.1 ? 3 : 1);
                 const xp = 50 * bonus;
+                const moneyBonus = 10 * bonus;
+                
                 if (state.currentSkill) {
                     state.skills[state.currentSkill].xp += xp;
                 }
+                state.money += moneyBonus;
                 state.cryptoStreak++;
-                alert(bonus > 1 ? `🔥 x${bonus} БОНУС! +${xp} опыта!` : `✅ Угадал! +${xp} опыта`);
+                alert(bonus > 1 ? `🔥 x${bonus} БОНУС! +${xp} опыта, +${moneyBonus}$!` : `✅ Угадал! +${xp} опыта, +${moneyBonus}$`);
             } else {
                 state.cryptoStreak = 0;
                 alert('❌ Рынок показал характер.');
@@ -1044,25 +1213,6 @@
         function showStatus() {
             state.screen = 'status-detail';
             render();
-        }
-
-        function openSettings() {
-            state.showSettings = true;
-            render();
-        }
-
-        function closeSettings() {
-            state.showSettings = false;
-            render();
-        }
-
-        function saveBackground() {
-            const input = document.getElementById('bg-input');
-            if (input && input.value.trim()) {
-                state.customBackground = input.value.trim();
-                save();
-                closeSettings();
-            }
         }
 
         // Рендер
@@ -1134,6 +1284,7 @@
                 
                 app.innerHTML = `
                     ${renderTopStatus()}
+                    ${renderActions()}
                     <div class="skill-screen">
                         <div class="skill-top">
                             <div class="skill-icon">${icons[state.currentSkill]}</div>
@@ -1163,6 +1314,7 @@
             if (state.screen === 'status-detail') {
                 app.innerHTML = `
                     ${renderTopStatus()}
+                    ${renderActions()}
                     <div class="content-screen">
                         <div class="screen-title">Твой статус</div>
                         <div class="card">
@@ -1215,7 +1367,41 @@
                             </div>
                         </div>
                         <button class="back-btn" style="margin-top: 2rem;" onclick="navigate('home')">← На главную</button>
-                        <button class="back-btn" style="margin-top: 1rem;" onclick="openSettings()">⚙️ Настроить фон</button>
+                    </div>
+                    ${renderNav()}
+                `;
+                return;
+            }
+            
+            // Магазин
+            if (state.screen === 'shop') {
+                app.innerHTML = `
+                    ${renderTopStatus()}
+                    ${renderActions()}
+                    <div class="content-screen">
+                        <div class="screen-title">Магазин</div>
+                        <div class="card" style="text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+                            <div style="font-size: 2rem; font-weight: 800; color: #00ff88;">${state.money}$</div>
+                            <div style="font-size: 0.9rem; color: #888;">Твой баланс</div>
+                        </div>
+                        ${shopItems.map(item => `
+                            <div class="shop-item" onclick="buyItem('${item.id}')">
+                                <div class="item-header">
+                                    <div>
+                                        <div class="item-name">${item.name}</div>
+                                        <div class="item-level">${item.effect === 'hunger' ? 'Снижает голод на 50%' : 'Полная зарядка'}</div>
+                                    </div>
+                                    <div>
+                                        <div class="item-icon">${item.emoji}</div>
+                                        <div class="item-price">${item.price}$</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <div style="margin-top: 2rem; padding: 1rem; background: rgba(0,255,136,0.1); border-radius: 12px; font-size: 0.9rem; color: #888;">
+                            💡 Зарабатывай деньги изучая навыки и повышая уровень!
+                        </div>
                     </div>
                     ${renderNav()}
                 `;
@@ -1228,12 +1414,10 @@
                 const canOpen = state.charge > 5;
                 const cryptoToday = state.cryptoDate === new Date().toDateString();
                 
-                // Определяем фон
-                const bgImage = state.customBackground || scene.bg;
-                
                 app.innerHTML = `
                     ${renderTopStatus()}
-                    <div class="scene" style="background-image: url('${bgImage}')">
+                    ${renderActions()}
+                    <div class="scene">
                         <div class="scene-content">
                             <div class="scene-title">${scene.title}</div>
                             <div class="scene-desc">${scene.desc}</div>
@@ -1269,6 +1453,7 @@
                 
                 app.innerHTML = `
                     ${renderTopStatus()}
+                    ${renderActions()}
                     <div class="content-screen">
                         <div class="screen-title">Навыки</div>
                         ${unlocked.length > 0 ? unlocked.map(([key, skill]) => {
@@ -1299,6 +1484,7 @@
             } else if (state.screen === 'jobs') {
                 app.innerHTML = `
                     ${renderTopStatus()}
+                    ${renderActions()}
                     <div class="content-screen">
                         <div class="screen-title">Работа</div>
                         ${state.jobs.length > 0 ? state.jobs.map(job => `
@@ -1350,34 +1536,54 @@
                 app.appendChild(courseOverlay);
             }
             
-            // Настройки
-            if (state.showSettings) {
-                const settingsOverlay = document.createElement('div');
-                settingsOverlay.className = 'settings-overlay';
-                settingsOverlay.innerHTML = `
-                    <div class="settings-box">
-                        <div class="settings-title">⚙️ Настройки</div>
-                        <div class="settings-item">
-                            <div class="settings-label">URL фона для главного экрана:</div>
-                            <input type="text" id="bg-input" class="settings-input" 
-                                   value="${state.customBackground}" 
-                                   placeholder="Вставьте ссылку на изображение">
-                            <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-                                Например: https://example.com/image.jpg<br>
-                                Или положите фото рядом: ./image/fon1.jpg
+            // Обучающие экраны
+            if (state.showTutorial) {
+                const tutorialOverlay = document.createElement('div');
+                tutorialOverlay.className = 'tutorial-overlay';
+                
+                if (state.tutorialStep === 1) {
+                    tutorialOverlay.innerHTML = `
+                        <div class="tutorial-box">
+                            <div class="tutorial-icon">✨</div>
+                            <div class="tutorial-title">Новая возможность!</div>
+                            <div class="tutorial-text">
+                                Теперь у тебя есть шанс изучить что-то новое, что поможет тебе зарабатывать деньги и улучшать свою жизнь.
                             </div>
+                            <button class="tutorial-btn" onclick="state.showCourseSelection = true; state.showTutorial = false; render();">
+                                Выбрать курс
+                            </button>
                         </div>
-                        <button class="main-btn" onclick="saveBackground()">Сохранить</button>
-                        <button class="back-btn" style="margin-top: 1rem;" onclick="closeSettings()">Отмена</button>
-                    </div>
-                `;
-                app.appendChild(settingsOverlay);
+                    `;
+                } else if (state.tutorialStep === 2) {
+                    const course = courses.find(c => c.key === state.selectedCourse);
+                    tutorialOverlay.innerHTML = `
+                        <div class="tutorial-box">
+                            <div class="tutorial-icon">${course.emoji}</div>
+                            <div class="tutorial-title">${course.desc}</div>
+                            <div class="tutorial-text">
+                                Теперь ты можешь изучать навык <strong>${course.desc}</strong>, чтобы зарабатывать деньги!
+                            </div>
+                            <div class="tutorial-highlight">
+                                💡 <strong>Совет:</strong> Ты всегда можешь параллельно изучить другие навыки, найдя новые курсы в ленте. Деньги можно тратить в магазине на еду и зарядку телефона!
+                            </div>
+                            <button class="tutorial-btn" onclick="completeTutorial()">
+                                Начать обучение
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                app.appendChild(tutorialOverlay);
             }
         }
         
         function renderTopStatus() {
             return `
                 <div class="top-status" onclick="showStatus()">
+                    <div class="status-item">
+                        <span class="status-icon">💰</span>
+                        <span>${state.money}$</span>
+                    </div>
                     <div class="status-item">
                         <span class="status-icon">🍔</span>
                         <span>${Math.max(0, 100 - Math.floor(state.hunger))}%</span>
@@ -1394,6 +1600,29 @@
             `;
         }
         
+        function renderActions() {
+            const chargeAvailable = canCharge();
+            const eatAvailable = canEat();
+            
+            return `
+                <div class="top-actions">
+                    <div class="day-counter">День ${state.day}</div>
+                    <button class="action-btn ${!chargeAvailable ? 'cooldown' : ''}" 
+                            onclick="chargePhone()" 
+                            ${!chargeAvailable ? 'disabled' : ''}>
+                        <span>⚡</span>
+                        <span>${chargeAvailable ? 'Зарядить' : getTimeLeft(state.lastCharge)}</span>
+                    </button>
+                    <button class="action-btn ${!eatAvailable ? 'cooldown' : ''}" 
+                            onclick="eatFood()" 
+                            ${!eatAvailable ? 'disabled' : ''}>
+                        <span>🍔</span>
+                        <span>${eatAvailable ? 'Покушать' : getTimeLeft(state.lastEat)}</span>
+                    </button>
+                </div>
+            `;
+        }
+        
         function renderPhone() {
             const cards = [];
             for (let i = 0; i < 5; i++) {
@@ -1406,21 +1635,40 @@
                     <div class="phone-notch"></div>
                     <button class="close-phone" onclick="closePhone()">✕</button>
                     <div class="phone-content">
-                        ${cards.map(card => `
-                            <div class="feed-card">
-                                <div class="feed-emoji">${card.emoji}</div>
-                                <div class="feed-text">${card.text}</div>
-                                <div class="feed-btns">
-                                    ${card.type === 'trigger' ? `
-                                        <button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ОТКРЫТЬ</button>
-                                    ` : `
-                                        <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
-                                        <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
-                                        <button class="feed-btn" onclick='feedAction("schnela", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ШНЕЛЯ</button>
-                                    `}
+                        ${cards.map(card => {
+                            let buttons;
+                            if (card.type === 'first-course') {
+                                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ВЫБРАТЬ КУРС</button>`;
+                            } else if (card.type === 'trigger') {
+                                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ОТКРЫТЬ</button>`;
+                            } else if (state.degradation < 30) {
+                                buttons = `
+                                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
+                                    <button class="feed-btn" onclick='feedAction("clear", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ЯСНО</button>
+                                    <button class="feed-btn" onclick='feedAction("get", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПОНЯТНО</button>
+                                `;
+                            } else if (state.degradation < 60) {
+                                buttons = `
+                                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
+                                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
+                                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
+                                `;
+                            } else {
+                                buttons = `
+                                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
+                                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
+                                    <button class="feed-btn" onclick='feedAction("schnela", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ШНЕЛЯ</button>
+                                `;
+                            }
+                            
+                            return `
+                                <div class="feed-card">
+                                    <div class="feed-emoji">${card.emoji}</div>
+                                    <div class="feed-text">${card.text}</div>
+                                    <div class="feed-btns">${buttons}</div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                         <div class="feed-hint">
                             ${state.degradation > 60 ? 'Голова гудит...' : 
                               state.degradation > 30 ? 'Ты листаешь снова.' : 
@@ -1443,13 +1691,13 @@
                         <div class="nav-icon">📚</div>
                         НАВЫКИ
                     </button>
+                    <button class="nav-item ${state.screen === 'shop' ? 'active' : ''}" onclick="navigate('shop')">
+                        <div class="nav-icon">🛒</div>
+                        МАГАЗИН
+                    </button>
                     <button class="nav-item ${state.screen === 'jobs' ? 'active' : ''}" onclick="navigate('jobs')">
                         <div class="nav-icon">💼</div>
                         РАБОТА
-                    </button>
-                    <button class="nav-item" style="opacity: 0.3;">
-                        <div class="nav-icon">🏢</div>
-                        БИЗНЕС
                     </button>
                 </div>
             `;
@@ -1460,16 +1708,12 @@
             load();
             render();
             
-            // Игровой цикл
             setInterval(() => {
                 if (state.screen !== 'onboarding') {
                     updateTime();
-                    // Перерисовываем только если нужно
-                    if (state.screen === 'home' || state.screen === 'skill') {
-                        render();
-                    }
+                    render();
                 }
-            }, 5000); // Каждые 5 секунд
+            }, 5000);
         };
     </script>
 </body>
