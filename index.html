@@ -2,977 +2,1013 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Социальный Лифт</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WATAFA GAME</title>
 
-  <!-- Adsgram -->
+  <!-- Adsgram (Telegram Mini Apps) -->
   <script src="https://adsgram.ai/assets/js/adsgram.js"></script>
 
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
+    * { margin:0; padding:0; box-sizing:border-box; }
     body{
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      background:#0a0a0a;color:#fff;overflow-x:hidden;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:#0a0a0a; color:#fff; overflow-x:hidden;
     }
-    #app{max-width:420px;margin:0 auto;min-height:100vh;background:#161616;position:relative}
+    #app{ max-width:420px; margin:0 auto; min-height:100vh; background:#161616; position:relative; }
 
-    /* Onboarding */
+    /* ===== Onboarding ===== */
     .onboarding{
-      position:fixed;inset:0;background:#000;z-index:4000;
-      display:flex;align-items:center;justify-content:center;flex-direction:column;
-      padding:2rem;text-align:center;
+      position:fixed; inset:0; background:#000; z-index:1000;
+      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      padding:2rem; text-align:center;
     }
-    .onboarding-text{font-size:1.25rem;margin-bottom:1.8rem;animation:fadeIn .7s ease-out}
-    .notification-box{width:100%;max-width:300px}
+    .onboarding-text{ font-size:1.25rem; margin-bottom:2rem; animation:fadeIn .6s ease-out; }
+    .notification-box{ width:100%; max-width:320px; }
     .notification{
-      background:#1f1f1f;padding:1rem 1.2rem;border-radius:12px;margin:.5rem 0;
-      border-left:3px solid #ff4444;animation:slideUp .45s ease-out forwards;opacity:0;
+      background:#1f1f1f; padding:1rem 1.2rem; border-radius:12px; margin:.5rem 0;
+      border-left:3px solid #ff4444; animation:slideUp .45s ease-out forwards; opacity:0;
     }
-    .notification:nth-child(1){animation-delay:.2s}
-    .notification:nth-child(2){animation-delay:.45s}
-    .notification:nth-child(3){animation-delay:.7s}
-    .notification:nth-child(4){animation-delay:.95s}
-    .notif-title{font-size:.82rem;color:#888;margin-bottom:.25rem}
-    .notif-text{font-size:1.05rem;font-weight:800}
+    .notification:nth-child(1){ animation-delay:.1s; }
+    .notification:nth-child(2){ animation-delay:.35s; }
+    .notification:nth-child(3){ animation-delay:.6s; }
+    .notification:nth-child(4){ animation-delay:.85s; }
+    .notif-title{ font-size:.85rem; color:#888; margin-bottom:.25rem; }
+    .notif-text{ font-size:1.05rem; font-weight:800; }
     .start-btn{
-      margin-top:1.6rem;padding:1.1rem 2.8rem;background:#00ff88;color:#000;border:none;
-      border-radius:12px;font-size:1.05rem;font-weight:800;cursor:pointer;
-      animation:slideUp .45s ease-out 1.2s forwards;opacity:0;
+      margin-top:1.5rem; padding:1.1rem 2.6rem; background:#00ff88; color:#000;
+      border:none; border-radius:12px; font-size:1.05rem; font-weight:800; cursor:pointer;
+      animation:slideUp .45s ease-out 1.1s forwards; opacity:0;
     }
-    .start-btn:active{transform:scale(.97)}
+    .start-btn:active{ transform:scale(.96); }
 
-    /* Top bar (HOME only: hunger/charge/level) */
-    .top-bar{
-      position:fixed;top:12px;left:50%;transform:translateX(-50%);
-      width:calc(100% - 24px);max-width:396px;
-      background:rgba(31,31,31,.92);backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,.12);border-radius:18px;
-      padding:.7rem .9rem;z-index:300;display:flex;gap:.8rem;justify-content:space-between;
+    /* ===== Top hint (optional) ===== */
+    .top-hint{
+      position:fixed; top:0; left:0; right:0; z-index:300;
+      background:linear-gradient(135deg,#00ff88 0%,#00cc6a 100%); color:#000;
+      padding:1rem; text-align:center; font-weight:900; font-size:.95rem;
+      animation:slideDown .4s ease-out;
     }
-    .top-item{display:flex;align-items:center;gap:.35rem;font-weight:700;font-size:.9rem;color:#ddd}
-    .bar{width:72px;height:8px;background:#333;border-radius:999px;overflow:hidden}
-    .bar > div{height:100%;background:#00ff88;width:50%}
+    @keyframes slideDown{ from{ transform:translateY(-100%);} to{transform:translateY(0);} }
 
-    /* Scene */
+    /* ===== Top status bar: ONLY hunger/charge/level (as requested) ===== */
+    .top-status{
+      position:fixed; top:1rem; right:1rem; z-index:200;
+      background:rgba(31,31,31,.95); backdrop-filter:blur(10px);
+      padding:.6rem 1rem; border-radius:20px;
+      display:flex; align-items:center; gap:.75rem;
+      border:1px solid rgba(255,255,255,.08);
+      cursor:pointer; transition:.2s;
+    }
+    .top-status:hover{ border-color:#00ff88; }
+    .status-item{ display:flex; align-items:center; gap:.3rem; font-size:.8rem; font-weight:700; color:#eee; }
+    .status-icon{ font-size:.95rem; }
+
+    /* ===== Scene ===== */
     .scene{
       min-height:100vh;
-      background-size:cover;background-position:center;
-      display:flex;align-items:center;justify-content:center;position:relative;
-      overflow:hidden;padding:2rem;
+      background-image:url('https://dragonlors.github.io/test/image/fon1.png');
+      background-size:cover; background-position:center;
+      display:flex; align-items:center; justify-content:center;
+      position:relative; overflow:hidden; padding:2rem;
     }
     .scene::before{
-      content:"";position:absolute;inset:0;
-      background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,.72) 100%);
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,.65) 100%);
       z-index:1;
     }
-    .scene-content{z-index:2;text-align:center;max-width:340px}
-    .scene-title{font-size:2.1rem;font-weight:900;margin-bottom:.9rem;text-shadow:0 2px 24px rgba(0,0,0,.9)}
-    .scene-desc{font-size:1.03rem;line-height:1.6;color:#f2f2f2;margin-bottom:1.2rem;text-shadow:0 1px 12px rgba(0,0,0,.85)}
+    .scene-content{ text-align:center; z-index:2; max-width:330px; position:relative; }
+    .scene-title{ font-size:2.1rem; font-weight:900; margin-bottom:1rem; text-shadow:0 2px 20px rgba(0,0,0,.8); }
+    .scene-desc{ font-size:1.03rem; color:#fff; line-height:1.6; margin-bottom:1.2rem; text-shadow:0 1px 10px rgba(0,0,0,.8); }
     .scene-hint{
-      padding:1rem;background:rgba(0,0,0,.52);backdrop-filter:blur(10px);
-      border-radius:14px;border:1px solid rgba(255,255,255,.1);
-      font-size:.95rem;color:#ddd;font-style:italic;
+      padding:1rem; background:rgba(0,0,0,.5); backdrop-filter:blur(10px);
+      border-radius:12px; font-size:.95rem; font-style:italic; color:#ddd;
+      border:1px solid rgba(255,255,255,.1);
     }
 
-    /* One main button on HOME */
+    /* ===== Main action button ===== */
     .action-area{
-      position:absolute;left:0;right:0;bottom:92px;z-index:2;padding:0 1.2rem;
+      position:absolute; bottom:100px; left:0; right:0; padding:0 1.5rem; z-index:2;
     }
     .main-btn{
-      width:100%;padding:1.15rem;background:#00ff88;color:#000;border:none;border-radius:14px;
-      font-size:1.05rem;font-weight:900;cursor:pointer;
-      box-shadow:0 6px 26px rgba(0,255,136,.28);
+      width:100%; padding:1.15rem;
+      background:#00ff88; color:#000; border:none; border-radius:12px;
+      font-size:1.05rem; font-weight:900; cursor:pointer;
+      box-shadow:0 4px 20px rgba(0,255,136,.35);
     }
-    .main-btn:active{transform:scale(.98)}
-    .main-btn:disabled{background:#333;color:#666;box-shadow:none;cursor:not-allowed}
+    .main-btn:active{ transform:scale(.98); }
+    .main-btn:disabled{ background:#333; color:#666; cursor:not-allowed; box-shadow:none; }
 
-    /* Small “reality actions” on HOME (cafe) */
-    .home-quick{
-      position:fixed;top:66px;right:14px;z-index:310;
-      display:flex;flex-direction:column;gap:.55rem;
-    }
-    .qbtn{
-      background:rgba(31,31,31,.92);backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,.12);color:#fff;
-      border-radius:14px;padding:.65rem .85rem;font-size:.82rem;font-weight:700;
-      cursor:pointer;display:flex;align-items:center;gap:.45rem;
-    }
-    .qbtn:disabled{opacity:.5;cursor:not-allowed}
-    .qbtn small{color:#aaa;font-weight:700}
-
-    /* Bottom nav */
-    .nav{
-      position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-      max-width:420px;width:100%;
-      background:#1f1f1f;border-top:1px solid #2a2a2a;
-      display:flex;z-index:250;
-    }
-    .nav-item{
-      flex:1;border:none;background:transparent;color:#666;
-      display:flex;flex-direction:column;align-items:center;gap:.25rem;
-      padding:.75rem .45rem;font-size:.7rem;font-weight:800;cursor:pointer;
-    }
-    .nav-item.active{color:#00ff88}
-    .nav-icon{font-size:1.45rem}
-
-    /* Phone Feed overlay */
-    .overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:3500;
-      display:flex;align-items:center;justify-content:center;animation:fadeIn .25s ease-out;
+    /* ===== Phone overlay (Feed + Skills tabs inside) ===== */
+    .phone-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.95);
+      z-index:2000; display:flex; align-items:center; justify-content:center;
+      animation:fadeIn .25s ease-out;
     }
     .phone{
-      width:360px;height:720px;background:#000;border-radius:40px;
-      border:8px solid #1a1a1a;position:relative;overflow:hidden;
-      box-shadow:0 20px 70px rgba(0,0,0,.85);
+      width:360px; height:720px; background:#000;
+      border-radius:40px; border:8px solid #1a1a1a;
+      position:relative; overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.85);
     }
     .phone-notch{
-      position:absolute;top:0;left:50%;transform:translateX(-50%);
-      width:120px;height:28px;background:#000;border-radius:0 0 20px 20px;z-index:10;
+      position:absolute; top:0; left:50%; transform:translateX(-50%);
+      width:120px; height:28px; background:#000; border-radius:0 0 20px 20px; z-index:10;
     }
     .close-phone{
-      position:absolute;top:48px;right:12px;width:40px;height:40px;border:none;
-      border-radius:999px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);
-      color:#fff;font-size:1.45rem;cursor:pointer;z-index:11;
-      display:flex;align-items:center;justify-content:center;
+      position:absolute; top:50px; right:1rem; z-index:11;
+      width:40px; height:40px; border:none; border-radius:20px;
+      background:rgba(255,255,255,.1); backdrop-filter:blur(10px);
+      color:#fff; font-size:1.4rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
     }
+
+    .phone-tabs{
+      position:absolute; top:40px; left:0; right:0; z-index:11;
+      padding:0 1rem;
+      display:flex; gap:.6rem;
+    }
+    .tab-btn{
+      flex:1;
+      padding:.7rem .8rem;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(31,31,31,.85);
+      color:#cfcfcf;
+      font-weight:900;
+      cursor:pointer;
+      transition:.2s;
+      text-align:center;
+      user-select:none;
+      font-size:.85rem;
+    }
+    .tab-btn.active{
+      background:rgba(0,255,136,.18);
+      border-color:rgba(0,255,136,.6);
+      color:#00ff88;
+    }
+
     .phone-content{
-      height:100%;padding:40px 1rem 1rem;overflow:hidden;
-      display:flex;flex-direction:column;gap:1rem;
+      height:100%;
+      overflow-y:auto;
+      padding:90px 1rem 1rem; /* space for tabs */
+      scroll-behavior:smooth;
     }
+    .phone-content::-webkit-scrollbar{ display:none; }
+
     .feed-card{
-      background:#161616;border:1px solid #2a2a2a;border-radius:18px;
-      padding:1.4rem;animation:slideUp .25s ease-out;
-      flex:1;display:flex;flex-direction:column;justify-content:center;
+      background:#161616; border-radius:16px; padding:1.4rem;
+      margin-bottom:1rem; border:1px solid #2a2a2a; animation:slideUp .25s ease-out;
     }
-    .feed-emoji{font-size:3.1rem;text-align:center;margin-bottom:1rem}
-    .feed-text{font-size:1.02rem;text-align:center;line-height:1.55;color:#e4e4e4;margin-bottom:1.2rem}
-    .feed-btns{display:flex;gap:.5rem}
+    .feed-emoji{ font-size:3rem; text-align:center; margin-bottom:1rem; }
+    .feed-text{ font-size:1rem; text-align:center; margin-bottom:1.2rem; line-height:1.5; color:#ddd; }
+    .feed-btns{ display:flex; gap:.5rem; }
     .feed-btn{
-      flex:1;padding:.85rem;border-radius:10px;border:2px solid #333;
-      background:transparent;color:#fff;font-weight:900;font-size:.85rem;
-      cursor:pointer;transition:.15s;
+      flex:1; padding:.8rem; border:2px solid #333; background:transparent; color:#fff;
+      border-radius:8px; font-weight:800; cursor:pointer; transition:.2s; font-size:.85rem;
     }
-    .feed-btn:hover{border-color:#00ff88;background:rgba(0,255,136,.08)}
-    .feed-btn.primary{background:#00ff88;color:#000;border-color:#00ff88}
-    .feed-hint{text-align:center;color:#777;font-size:.9rem;font-style:italic}
+    .feed-btn:hover{ background:#222; border-color:#00ff88; }
+    .feed-btn.trigger{ background:#00ff88; color:#000; border-color:#00ff88; }
 
-    /* Screens (Status/Business) */
-    .screen{padding:1.2rem;padding-top:4.5rem;padding-bottom:92px;min-height:100vh}
-    .title{font-size:1.7rem;font-weight:900;margin-bottom:1rem}
-    .card{background:#1f1f1f;border:1px solid #2a2a2a;border-radius:16px;padding:1.2rem;margin-bottom:.9rem}
-    .card h3{font-size:.86rem;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.7rem}
-    .big{font-size:1.8rem;font-weight:900;color:#00ff88}
-    .muted{color:#9a9a9a;font-size:.92rem;line-height:1.5}
+    .feed-hint{ text-align:center; color:#777; font-size:.9rem; margin:1rem 0; font-style:italic; }
 
-    .pillrow{display:flex;flex-wrap:wrap;gap:.5rem}
-    .pill{
-      padding:.55rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.05);font-weight:800;font-size:.8rem;color:#ddd;
+    /* ===== Skills screen inside phone ===== */
+    .skill-card{
+      background:#161616; border-radius:16px; padding:1.3rem;
+      margin-bottom:1rem; border:1px solid #2a2a2a;
     }
+    .skill-row{ display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .skill-left{ display:flex; align-items:center; gap:.8rem; }
+    .skill-emoji{ font-size:2rem; }
+    .skill-name{ font-size:1.05rem; font-weight:900; }
+    .skill-sub{ font-size:.85rem; color:#888; margin-top:.15rem; }
+    .skill-btn{
+      padding:.75rem 1rem; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(31,31,31,.85); color:#fff; font-weight:900; cursor:pointer;
+      transition:.2s;
+    }
+    .skill-btn.primary{ background:#00ff88; color:#000; border-color:#00ff88; }
+    .skill-btn:active{ transform:scale(.98); }
 
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-    .hidden{display:none!important}
+    .progress{ width:100%; height:8px; background:#333; border-radius:4px; overflow:hidden; margin:.9rem 0 0; }
+    .progress-fill{ height:100%; background:#00ff88; transition:width .35s; border-radius:4px; }
+
+    .train-btn{
+      width:100%; padding:1.2rem; border:none; border-radius:14px;
+      background:linear-gradient(135deg,#00ff88 0%,#00cc6a 100%);
+      color:#000; font-weight:950; font-size:1.05rem; cursor:pointer;
+      box-shadow:0 4px 20px rgba(0,255,136,.25);
+      margin-top:.8rem;
+    }
+    .train-btn:disabled{ background:#333; color:#666; cursor:not-allowed; box-shadow:none; }
+
+    .tiny-note{ text-align:center; color:#8a8a8a; font-size:.85rem; margin-top:.8rem; }
+
+    /* ===== Screens (Status / Business placeholder) ===== */
+    .content-screen{ padding:1.5rem; padding-bottom:100px; padding-top:5rem; min-height:100vh; }
+    .screen-title{ font-size:1.7rem; font-weight:950; margin-bottom:1.2rem; }
+
+    .card{
+      background:#1f1f1f; border-radius:16px; padding:1.2rem;
+      margin-bottom:1rem; border:1px solid #2a2a2a;
+    }
+    .card-header{ font-size:.8rem; color:#888; text-transform:uppercase; letter-spacing:1px; margin-bottom:.6rem; font-weight:800; }
+    .card-value{ font-size:1.2rem; font-weight:900; margin-bottom:.3rem; }
+    .card-desc{ font-size:.9rem; color:#9a9a9a; line-height:1.5; }
+
+    .ad-reward-wrap{
+      display:grid; grid-template-columns:1fr 1fr; gap:.8rem;
+      margin-top:.7rem;
+    }
+    .ad-btn{
+      padding:1rem; border-radius:14px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(31,31,31,.9); color:#fff; font-weight:950; cursor:pointer; transition:.2s;
+      display:flex; align-items:center; justify-content:center; gap:.5rem;
+    }
+    .ad-btn:hover{ border-color:rgba(0,255,136,.6); background:rgba(0,255,136,.08); }
+    .ad-left{ color:#7d7d7d; font-size:.9rem; text-align:center; margin-top:.6rem; }
+
+    /* ===== Bottom nav ===== */
+    .nav{
+      position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+      max-width:420px; width:100%;
+      background:#1f1f1f; border-top:1px solid #2a2a2a;
+      display:flex; z-index:100;
+    }
+    .nav-item{
+      flex:1; display:flex; flex-direction:column; align-items:center; gap:.25rem;
+      padding:.75rem .4rem; border:none; background:transparent;
+      color:#666; cursor:pointer; font-size:.7rem; font-weight:900; transition:.2s;
+    }
+    .nav-item.active{ color:#00ff88; }
+    .nav-icon{ font-size:1.35rem; }
+
+    /* Animations */
+    @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+    @keyframes slideUp{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+    @keyframes slideDown{ from{transform:translateY(-100%);} to{transform:translateY(0);} }
+    .hidden{ display:none !important; }
   </style>
 </head>
 
 <body>
-<div id="app"></div>
+  <div id="app"></div>
 
-<script>
-/** ============================
- *  STATE + SAVE/LOAD
- *  ============================ */
-const STORAGE_KEY = "socialLift_v2";
+  <script>
+    // =========================
+    // STATE
+    // =========================
+    const DEFAULT_STATE = {
+      step: 0,
+      screen: "onboarding",
 
-const defaultState = () => ({
-  screen: "onboarding",
-  onboardingStep: 0,
+      // HOME top bar must show ONLY these:
+      hunger: 70,   // 0..100 (0 = совсем пусто, 100 = полностью)
+      charge: 55,   // 0..100
+      level: 1,
 
-  // HOME (only show hunger/charge/level)
-  hunger: 10,         // 0..100 (0 = сытый, 100 = голодный)
-  charge: 100,        // 0..100
-  level: 1,
+      // Hidden from HOME, visible in STATUS:
+      money: 0,
 
-  // Hidden on HOME, shown in STATUS
-  money: 0,
-  degradation: 0,     // 0..100
-  concentration: 60,  // 0..100
-  chaos: 20,          // 0..100
-  authority: 0,       // 0..100 (для будущего)
-  city: 0,            // 0..N
+      // Meta
+      day: 1,
 
-  home: "none",       // none/basement/room/flat/...
-  day: 1,             // игровая “дата”
+      // Degradation (from feed)
+      degradation: 0,
 
-  // Feed
-  showPhone: false,
-  feedClicks: 0,
-  currentFeedCard: null,   // ВАЖНО: чтобы не обновлялась сама
-  firstCourseOffered: false,
-  selectedCourse: null,
+      // Home scene
+      home: "none",
 
-  // Skills
-  skills: {
-    tech: { level: 0, xp: 0, unlocked: false },
-    music:{ level: 0, xp: 0, unlocked: false },
-    sport:{ level: 0, xp: 0, unlocked: false },
-    politics:{ level: 0, xp: 0, unlocked: false }
-  },
+      // Feed/Phone
+      showPhone: false,
+      phoneTab: "feed", // "feed" | "skills"
+      feedClicks: 0,
 
-  // Daily freebies (cafe)
-  lastDayKey: null,
-  freeChargeLeft: 2,
-  freeFoodLeft: 1,
+      // Fix "feed постоянно обновляется":
+      currentFeedCard: null,        // card object
+      currentFeedSeed: 0,           // increments when user actually scrolls
 
-  // Ads rewards (daily)
-  adsChargeLeft: 3,
-  adsFoodLeft: 3,
+      // Courses/skills
+      firstCourseOffered: false,
+      selectedCourse: null,
+      skills: {
+        tech:     { level: 0, xp: 0, unlocked: false },
+        music:    { level: 0, xp: 0, unlocked: false },
+        sport:    { level: 0, xp: 0, unlocked: false },
+        politics: { level: 0, xp: 0, unlocked: false }
+      },
 
-  // Crypto Guess (daily) — без денег, только бонусы
-  cryptoDateKey: null,
-  cryptoStreak: 0,
-  incomeBoostUntil: 0,    // timestamp ms
-  incomeBoostMult: 1,
+      // Ads rewards daily limits
+      ads: {
+        date: null,            // toDateString()
+        foodLeft: 3,
+        chargeLeft: 3
+      },
 
-  lastUpdate: Date.now()
-});
+      // lastUpdate for passive regen
+      lastUpdate: Date.now(),
 
-let state = defaultState();
+      // UI hint
+      showFirstHint: false
+    };
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+    const state = structuredClone(DEFAULT_STATE);
 
-function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  try {
-    const parsed = JSON.parse(raw);
-    state = Object.assign(defaultState(), parsed);
-    state.lastUpdate = Date.now();
-  } catch(e) {}
-}
+    // =========================
+    // CONTENT
+    // =========================
+    const scenes = {
+      none: {
+        title: "Улица",
+        desc: "Ты сидишь на картонке возле зарядки. Телефон — твой единственный инструмент.",
+        hint: "Найди в ленте шанс, чтобы выбрать путь."
+      },
+      basement: {
+        title: "Подвал",
+        desc: "Сырой подвал и лампа. Но это уже твой угол.",
+        hint: "Тут проще сосредоточиться."
+      }
+    };
 
-/** ============================
- *  CONTENT
- *  ============================ */
-const scenes = {
-  none: {
-    title: "Улица",
-    desc: "Ты сидишь на картонке у кафе. В руках телефон. Рядом розетка и Wi-Fi.",
-    hint: "Ты нашёл розетку и Wi-Fi."
-  },
-  basement: {
-    title: "Подвал",
-    desc: "Сырой подвал с лампой. Не мечта, но уже своё место.",
-    hint: "Тут можно учиться без ветра и дождя."
-  }
-};
+    const feedData = {
+      trash: [
+        { text: "15 лайфхаков как стать миллионером за неделю", emoji: "💸" },
+        { text: "Топ-10 мемов, от которых тупеют пальцы", emoji: "🤡" },
+        { text: "Этот трюк шокирует даже врачей!", emoji: "😱" },
+        { text: "Купи курс у эксперта с 2 месяцами опыта", emoji: "🎯" },
+        { text: "Залипательное видео: краска сохнет", emoji: "🎨" },
+        { text: "Гороскоп: тебя ждёт удача... может быть", emoji: "🔮" }
+      ],
+      neutral: [
+        { text: "Рецепт простой еды на выживание", emoji: "🍜" },
+        { text: "Красивый закат над городом", emoji: "🌇" },
+        { text: "Интересные факты о космосе", emoji: "🌌" },
+        { text: "Короткий ролик про дисциплину", emoji: "🧠" },
+        { text: "Смешная реклама нового телефона", emoji: "📱" }
+      ],
+      triggers: [
+        { text: "Бесплатный курс: веб-разработка", emoji: "💻", branch: "tech" },
+        { text: "Открытая тренировка рядом", emoji: "🏋️", branch: "sport" },
+        { text: "Музыкальный баттл сегодня", emoji: "🎵", branch: "music" },
+        { text: "Нужны помощники на митинг", emoji: "🏛️", branch: "politics" }
+      ]
+    };
 
-const feedData = {
-  trash: [
-    { text: "15 лайфхаков как стать миллионером за неделю", emoji: "💸" },
-    { text: "Смотри как он танцует! Невероятно!", emoji: "🕺" },
-    { text: "Этот трюк шокирует даже врачей!", emoji: "😱" },
-    { text: "Подпишись на курс «Успех за 3 дня»", emoji: "🎯" },
-    { text: "Гороскоп: тебя ждёт удача… может быть", emoji: "🔮" },
-    { text: "Залипательное видео: краска сохнет", emoji: "🎨" },
-    { text: "Купи курс у эксперта с 2 месяцами опыта", emoji: "🤡" }
-  ],
-  neutral: [
-    { text: "Милый котик играет с коробкой", emoji: "🐱" },
-    { text: "Рецепт идеальной пасты карбонара", emoji: "🍝" },
-    { text: "Красивый закат над городом", emoji: "🌇" },
-    { text: "Как правильно заваривать чай", emoji: "☕" },
-    { text: "Интересные факты о космосе", emoji: "🌌" }
-  ],
-  triggers: [
-    { text: "Бесплатный курс: веб-разработка", emoji: "💻", branch: "tech" },
-    { text: "Музыкальный баттл сегодня вечером", emoji: "🎵", branch: "music" },
-    { text: "Открытая тренировка на турниках рядом", emoji: "🏋️", branch: "sport" },
-    { text: "Нужны помощники на общественную инициативу", emoji: "🏛️", branch: "politics" }
-  ],
-  specials: [
-    { text: "📈 Crypto Guess: BTC сегодня вверх или вниз?", emoji: "📈", type: "crypto" }
-  ]
-};
+    const courses = [
+      { key:"tech",     emoji:"💻", name:"Основы технологий" },
+      { key:"music",    emoji:"🎵", name:"Основы музыки" },
+      { key:"sport",    emoji:"🏋️", name:"Основы спорта" },
+      { key:"politics", emoji:"🏛️", name:"Основы политики" }
+    ];
 
-const courses = [
-  { key: "tech", emoji: "💻", name: "Технологии", desc: "Основы (потом откроется PenTest и т.д.)" },
-  { key: "music", emoji: "🎵", name: "Музыка", desc: "Направления: рэп/поп/битмейкинг и т.д." },
-  { key: "sport", emoji: "🏋️", name: "Спорт", desc: "Подветки: турники/зал/бокс/борьба…" },
-  { key: "politics", emoji: "🏛️", name: "Политика/Legal", desc: "От модерации текстов до юриста/лидера" }
-];
-
-/** ============================
- *  TIME + DAILY RESET
- *  ============================ */
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-}
-
-function ensureDailyReset() {
-  const key = todayKey();
-  if (state.lastDayKey === key) return;
-  state.lastDayKey = key;
-  state.freeChargeLeft = 2;
-  state.freeFoodLeft = 1;
-  state.adsChargeLeft = 3;
-  state.adsFoodLeft = 3;
-}
-
-function tickNeeds(deltaSec) {
-  // базовая деградация “от времени”
-  state.hunger = Math.min(100, state.hunger + deltaSec * 0.20); // голод растёт
-  state.charge = Math.max(0, state.charge - deltaSec * 0.12);  // заряд уходит
-  // небольшое восстановление деградации, если не скроллит бесконечно
-  state.degradation = Math.max(0, state.degradation - deltaSec * 0.01);
-}
-
-/** ============================
- *  FEED (FIX: card is stable until action)
- *  ============================ */
-function rollFeedCard() {
-  // 5-й клик — первый курс (как у тебя)
-  if (state.feedClicks === 4 && !state.firstCourseOffered) {
-    return { text: "🎓 Бесплатный курс по…", emoji: "🎓", type: "first-course" };
-  }
-
-  // иногда кидаем crypto guess как “событие” (если доступно и не сыграно сегодня)
-  const canCrypto = state.cryptoUnlocked() && state.cryptoDateKey !== todayKey();
-  const cryptoChance = canCrypto ? 12 : 0;
-
-  const rand = Math.random() * 100;
-
-  // деградация делает больше мусора :contentReference[oaicite:2]{index=2}
-  const trashBias = state.degradation * 0.35;
-  const triggerBias = Math.max(0, 18 - state.degradation * 0.15);
-
-  if (canCrypto && rand < cryptoChance) {
-    return { ...feedData.specials[0] };
-  }
-
-  if (rand < 50 + trashBias) {
-    return { ...pick(feedData.trash), type: "trash" };
-  } else if (rand < 80 + trashBias) {
-    return { ...pick(feedData.neutral), type: "neutral" };
-  } else if (rand < 95 + trashBias - triggerBias) {
-    return { ...pick(feedData.triggers), type: "trigger" };
-  } else {
-    return { ...pick(feedData.neutral), type: "neutral" };
-  }
-}
-
-function ensureFeedCard() {
-  if (!state.currentFeedCard) state.currentFeedCard = rollFeedCard();
-}
-
-function nextFeedCard() {
-  state.currentFeedCard = rollFeedCard();
-}
-
-/** ============================
- *  ADSGRAM (reward: food or charge)
- *  ============================ */
-function showAdReward(kind) {
-  ensureDailyReset();
-
-  if (kind === "charge" && state.adsChargeLeft <= 0) return alert("🎥 Реклама на заряд закончилась на сегодня.");
-  if (kind === "food" && state.adsFoodLeft <= 0) return alert("🎥 Реклама на еду закончилась на сегодня.");
-
-  if (!window.Adsgram || !window.Adsgram.init) {
-    alert("Adsgram не загрузился. Проверь, что это запускается внутри Telegram и скрипт доступен.");
-    return;
-  }
-
-  const AdController = window.Adsgram.init({ blockId: "21029" });
-
-  AdController.show().then(() => {
-    if (kind === "charge") {
-      state.charge = 100;
-      state.adsChargeLeft--;
-      alert("⚡ Спасибо! Телефон заряжен.");
-    } else {
-      state.hunger = Math.max(0, state.hunger - 70);
-      state.adsFoodLeft--;
-      alert("🍔 Спасибо! Ты поел.");
+    // =========================
+    // SAVE/LOAD
+    // =========================
+    function save() {
+      localStorage.setItem("watafa_game", JSON.stringify(state));
     }
-    render();
-  }).catch((result) => {
-    console.log("Реклама пропущена/ошибка:", result);
-    // награду не даём
-  });
-}
+    function load() {
+      const raw = localStorage.getItem("watafa_game");
+      if (!raw) return;
 
-/** ============================
- *  GAME ACTIONS
- *  ============================ */
-function startGame() {
-  state.screen = "home";
-  state.onboardingStep = 0;
-  state.money = 0;
-  state.level = 1;
-  state.home = "none";
-  state.hunger = 10;
-  state.charge = 100;
-  state.degradation = 0;
-  state.concentration = 60;
-  state.chaos = 20;
-  state.authority = 0;
-  state.feedClicks = 0;
-  state.currentFeedCard = null;
-  state.firstCourseOffered = false;
-  state.selectedCourse = null;
-  Object.keys(state.skills).forEach(k => state.skills[k] = { level:0, xp:0, unlocked:false });
-  ensureDailyReset();
-  render();
-}
+      try {
+        const parsed = JSON.parse(raw);
+        // merge shallow
+        Object.assign(state, parsed);
 
-function openFeed() {
-  if (state.charge < 5) return;
-  state.showPhone = true;
-  ensureFeedCard();
-  render();
-}
-function closeFeed() { state.showPhone = false; render(); }
+        // ensure missing defaults
+        if (!state.ads) state.ads = structuredClone(DEFAULT_STATE.ads);
+        if (!state.skills) state.skills = structuredClone(DEFAULT_STATE.skills);
 
-function feedClick(action) {
-  // любое действие в ленте = клик
-  state.feedClicks++;
-  // деградация растёт от скролла :contentReference[oaicite:3]{index=3}
-  state.charge = Math.max(0, state.charge - 2);
-  state.degradation = Math.min(100, state.degradation + 3);
-  state.concentration = Math.max(0, state.concentration - 1);
-  state.chaos = Math.min(100, state.chaos + 2);
-  state.hunger = Math.min(100, state.hunger + 0.7);
-
-  const card = state.currentFeedCard;
-
-  if (card.type === "first-course") {
-    // открываем выбор курса
-    state.showCoursePicker = true;
-    render();
-    return;
-  }
-
-  if (card.type === "trigger" && card.branch) {
-    if (!state.skills[card.branch].unlocked) {
-      state.skills[card.branch].unlocked = true;
-      state.selectedCourse = state.selectedCourse || card.branch;
-      alert(`🎯 Открыт путь: ${skillName(card.branch)}!`);
-      // лёгкий “буст” за шанс
-      state.authority = Math.min(100, state.authority + 2);
+        state.lastUpdate = Date.now();
+      } catch(e) {
+        console.warn("Load failed:", e);
+      }
     }
-  }
 
-  if (card.type === "crypto") {
-    // открываем crypto guess экран внутри ленты (карточка сменится на вариант)
-    state.showCrypto = true;
-    render();
-    return;
-  }
+    // =========================
+    // HELPERS
+    // =========================
+    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-  // IMPORTANT: карточка обновляется ТОЛЬКО ПОСЛЕ клика
-  nextFeedCard();
-  render();
-}
-
-function chooseCourse(key) {
-  state.selectedCourse = key;
-  state.skills[key].unlocked = true;
-  state.firstCourseOffered = true;
-  state.showCoursePicker = false;
-
-  alert(`✨ Выбран путь: ${skillName(key)}.\nТеперь прокачка будет появляться дальше через ленту и статус.`);
-  // после выбора курса — новая карточка
-  nextFeedCard();
-  render();
-}
-
-/** ============================
- *  SKILL TRAIN (simple prototype)
- *  ============================ */
-function trainSelectedSkill() {
-  if (!state.selectedCourse) return alert("Открой курс через ленту.");
-  if (state.hunger > 25) return alert("🍔 Слишком голоден. Поешь (кафе/реклама).");
-  if (state.charge < 5) return alert("🔋 Мало заряда.");
-
-  const s = state.skills[state.selectedCourse];
-
-  const eff = Math.max(0.25, 1 - (state.degradation/180) - (state.hunger/220));
-  const gain = Math.floor((2 + Math.random()*3) * eff);
-
-  s.xp += gain;
-  state.charge = Math.max(0, state.charge - 1.2);
-  state.hunger = Math.min(100, state.hunger + 1.0);
-  state.degradation = Math.min(100, state.degradation + 0.6);
-
-  const need = 100 + s.level*120;
-  if (s.xp >= need) {
-    s.xp -= need;
-    s.level++;
-    state.level++;
-
-    // деньги растут с уровнем (как ты хотел: “каждый уровень +$1”)
-    state.money += 1;
-
-    // “первый заработок” — позже здесь будут работы 100 кликов = $…
-    alert(`🎉 Уровень навыка: ${s.level}\n⭐ Общий уровень: ${state.level}\n+$1 (теперь у тебя ${state.money}$)`);
-
-    // пример смены дома (очень рано, чисто чтобы проверить механику сцен)
-    if (state.level === 5) state.home = "basement";
-  }
-  render();
-}
-
-/** ============================
- *  CRYPTO GUESS (daily, no money bet)
- *  ============================ */
-state.cryptoUnlocked = () => {
-  // для прототипа: откроем после skill lvl 3 в любой ветке
-  return Object.values(state.skills).some(s => s.level >= 3);
-};
-
-function cryptoGuess(dir) {
-  const key = todayKey();
-  if (state.cryptoDateKey === key) return alert("📈 Сегодня ты уже делал прогноз.");
-
-  // “обычный успех 92%, x2 5%, x3 3%, x10 0.001%” как у тебя :contentReference[oaicite:4]{index=4}
-  // но это множители бонусов, не деньги :contentReference[oaicite:5]{index=5}
-  const roll = Math.random() * 100;
-  let mult = 1;
-  if (roll < 0.001) mult = 10;
-  else if (roll < 3.001) mult = 3;
-  else if (roll < 8.001) mult = 2;
-
-  // Сам “рынок” — 50/50 направление (можно позже привязать к реальным данным)
-  const actual = Math.random() > 0.5 ? "up" : "down";
-  const win = (dir === actual);
-
-  if (win) {
-    state.cryptoStreak++;
-    const boostMinutes = mult === 10 ? 10 : (mult === 3 ? 30 : (mult === 2 ? 60 : 30));
-    state.incomeBoostMult = 1 + (mult === 10 ? 10 : mult === 3 ? 2 : mult === 2 ? 1 : 0.3);
-    state.incomeBoostUntil = Date.now() + boostMinutes*60*1000;
-
-    // бонус: опыт в выбранный навык
-    if (state.selectedCourse) state.skills[state.selectedCourse].xp += 30*mult;
-
-    alert(mult > 1
-      ? `🔥 Удача на твоей стороне! x${mult}\nБуст дохода: x${state.incomeBoostMult.toFixed(1)} на ${boostMinutes} мин.`
-      : "✅ Рынок на твоей стороне. Небольшой буст!");
-  } else {
-    state.cryptoStreak = 0;
-    alert("😄 Рынок снова показал характер. Никаких штрафов.");
-  }
-
-  state.cryptoDateKey = key;
-  state.showCrypto = false;
-  nextFeedCard();
-  render();
-}
-
-/** ============================
- *  FREE CAFE ACTIONS + ADS
- *  ============================ */
-function freeCharge() {
-  ensureDailyReset();
-  if (state.freeChargeLeft <= 0) return alert("⚡ Бесплатные зарядки на сегодня закончились.");
-  state.charge = 100;
-  state.freeChargeLeft--;
-  render();
-}
-function freeFood() {
-  ensureDailyReset();
-  if (state.freeFoodLeft <= 0) return alert("🍔 Бесплатная еда на сегодня закончилась.");
-  state.hunger = Math.max(0, state.hunger - 70);
-  state.freeFoodLeft--;
-  render();
-}
-
-/** ============================
- *  NAV
- *  ============================ */
-function navigate(screen) {
-  state.screen = screen;
-  // лента закрывается при смене экрана
-  state.showPhone = false;
-  render();
-}
-
-/** ============================
- *  UI HELPERS
- *  ============================ */
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
-function pctBar(value0to100){ return clamp(Math.round(value0to100),0,100); }
-function hungerShown(){ return 100 - Math.floor(state.hunger); } // сытость %
-function skillName(key){
-  return ({tech:"Технологии",music:"Музыка",sport:"Спорт",politics:"Политика/Legal"})[key] || key;
-}
-function fmtTimeLeft(ts){
-  const ms = ts - Date.now();
-  if (ms <= 0) return "0м";
-  const m = Math.ceil(ms/60000);
-  return `${m}м`;
-}
-
-/** ============================
- *  RENDER
- *  ============================ */
-function render() {
-  ensureDailyReset();
-  saveState();
-
-  const app = document.getElementById("app");
-
-  // Onboarding flow (мемный слив депо)
-  if (state.screen === "onboarding") {
-    const step = state.onboardingStep;
-
-    if (step === 0) {
-      app.innerHTML = `<div class="onboarding"><div class="onboarding-text">Ты решил заняться трейдингом…</div></div>`;
-      setTimeout(() => { state.onboardingStep = 1; render(); }, 1600);
-      return;
+    function getSkillName(key){
+      return ({ tech:"Технологии", music:"Музыка", sport:"Спорт", politics:"Политика" })[key] || key;
     }
-    if (step === 1) {
-      app.innerHTML = `
-        <div class="onboarding">
-          <div class="notification-box">
-            <div class="notification"><div class="notif-title">Binance</div><div class="notif-text">Маржин-колл</div></div>
-            <div class="notification"><div class="notif-title">Binance</div><div class="notif-text">Ликвидация</div></div>
-            <div class="notification"><div class="notif-title">Telegram</div><div class="notif-text">Бро, ты жив?</div></div>
-            <div class="notification"><div class="notif-title">Баланс</div><div class="notif-text">0.00 USDT</div></div>
-          </div>
-        </div>`;
-      setTimeout(() => { state.onboardingStep = 2; render(); }, 2600);
-      return;
+
+    function resetDailyAdsIfNeeded(){
+      const today = new Date().toDateString();
+      if (state.ads.date !== today) {
+        state.ads.date = today;
+        state.ads.foodLeft = 3;
+        state.ads.chargeLeft = 3;
+      }
     }
-    if (step === 2) {
-      app.innerHTML = `<div class="onboarding"><div class="onboarding-text">…и рынок решил иначе.</div></div>`;
-      setTimeout(() => { state.onboardingStep = 3; render(); }, 1500);
-      return;
+
+    function isInsideTelegram(){
+      // Best-effort detection. Adsgram requires Telegram environment.
+      return !!(window.Telegram && window.Telegram.WebApp);
     }
-    app.innerHTML = `
-      <div class="onboarding">
-        <div style="font-size:5.8rem;margin-bottom:1.3rem;">📦</div>
-        <div class="onboarding-text">Добро пожаловать обратно в реальность.</div>
-        <div style="font-size:.92rem;color:#666;">Зато опыт есть. 😄</div>
-        <button class="start-btn" onclick="startGame()">Начать заново</button>
-      </div>`;
-    return;
-  }
 
-  // Common parts
-  const topBar = (state.screen === "home")
-    ? renderTopBar()
-    : ""; // на других экранах — по желанию можно показывать иначе
+    // =========================
+    // TIME / REGEN (IMPORTANT CHANGE)
+    // Hunger now REGENERATES over time (not drains)
+    // Charge slowly drains over time
+    // =========================
+    function updateTime(){
+      const now = Date.now();
+      const dt = (now - state.lastUpdate) / 1000; // seconds
+      state.lastUpdate = now;
 
-  // HOME
-  if (state.screen === "home") {
-    const sc = scenes[state.home] || scenes.none;
-    const canOpen = state.charge >= 5;
+      // Hunger regen: +0.12 per sec (~7.2 per minute)
+      state.hunger = clamp(state.hunger + dt * 0.12, 0, 100);
 
-    const hint = state.charge < 20 ? "⚡ Экран тускнеет."
-      : state.hunger > 70 ? "🍔 Живот урчит."
-      : sc.hint;
+      // Charge drain: -0.03 per sec (~1.8 per minute)
+      state.charge = clamp(state.charge - dt * 0.03, 0, 100);
 
-    app.innerHTML = `
-      ${topBar}
-      ${renderHomeQuick()}
-      <div class="scene" style="background-image:url('https://dragonlors.github.io/test/image/fon1.png');">
-        <div class="scene-content">
-          <div class="scene-title">${sc.title}</div>
-          <div class="scene-desc">${sc.desc}</div>
-          <div class="scene-hint">${hint}</div>
+      // Degradation slowly cools down
+      state.degradation = clamp(state.degradation - dt * 0.02, 0, 100);
+
+      resetDailyAdsIfNeeded();
+    }
+
+    // =========================
+    // FEED (FIX: NO AUTO-REFRESH)
+    // =========================
+    function generateFeedCard(){
+      // 5-й клик = первый курс
+      if (state.feedClicks === 4 && !state.firstCourseOffered) {
+        return { type:"first-course", text:"Бесплатный курс по...", emoji:"🎓" };
+      }
+
+      // Probability depends on degradation
+      const rand = Math.random() * 100;
+      const trashBoost = state.degradation * 0.35;     // more trash if degradation high
+      const triggerBoost = Math.max(0, 18 - state.degradation * 0.15);
+
+      if (rand < 45 + trashBoost) {
+        const it = feedData.trash[Math.floor(Math.random() * feedData.trash.length)];
+        return { ...it, type:"trash" };
+      } else if (rand < 75 + trashBoost) {
+        const it = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
+        return { ...it, type:"neutral" };
+      } else if (rand < 92 + trashBoost - triggerBoost) {
+        const it = feedData.triggers[Math.floor(Math.random() * feedData.triggers.length)];
+        return { ...it, type:"trigger" };
+      } else {
+        const it = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
+        return { ...it, type:"neutral" };
+      }
+    }
+
+    function ensureFeedCard(){
+      // Only create when empty (opening phone or after user action)
+      if (!state.currentFeedCard) {
+        state.currentFeedCard = generateFeedCard();
+      }
+    }
+
+    function nextFeedCard(){
+      state.currentFeedSeed++;
+      state.currentFeedCard = generateFeedCard();
+    }
+
+    // =========================
+    // GAME FLOW
+    // =========================
+    function startGame(){
+      Object.assign(state, structuredClone(DEFAULT_STATE));
+      state.screen = "home";
+      state.showFirstHint = true;
+
+      // Prepare first feed card
+      state.currentFeedCard = null;
+
+      setTimeout(() => {
+        state.showFirstHint = false;
+        render();
+      }, 4500);
+
+      render();
+    }
+
+    function navigate(screen){
+      state.screen = screen;
+      state.showPhone = false;
+      render();
+    }
+
+    function openPhone(){
+      if (state.charge < 3) return;
+      state.showPhone = true;
+      state.phoneTab = "feed";
+      ensureFeedCard();
+      render();
+    }
+    function closePhone(){
+      state.showPhone = false;
+      render();
+    }
+    function switchPhoneTab(tab){
+      state.phoneTab = tab;
+      if (tab === "feed") ensureFeedCard();
+      render();
+    }
+
+    function unlockBranch(branch){
+      if (!branch) return;
+      if (!state.skills[branch]) return;
+      if (!state.skills[branch].unlocked) {
+        state.skills[branch].unlocked = true;
+        // First pick also sets selectedCourse if empty
+        if (!state.selectedCourse) state.selectedCourse = branch;
+        alert(`🎯 Открыт путь: ${getSkillName(branch)}!`);
+      }
+    }
+
+    function offerFirstCourse(){
+      // first course UI: use simple prompt overlay-like selection via confirm chain
+      // (kept simple to avoid huge UI)
+      const names = courses.map(c => `${c.emoji} ${c.name}`).join("\n");
+      const pick = prompt(
+        "Бесплатный курс!\nВыбери направление:\n\n" + names + "\n\nНапиши: tech / music / sport / politics",
+        "tech"
+      );
+      const key = (pick || "").trim().toLowerCase();
+      if (state.skills[key]) {
+        state.firstCourseOffered = true;
+        state.selectedCourse = key;
+        unlockBranch(key);
+        state.phoneTab = "skills";
+      } else {
+        alert("Не понял выбор. Напиши: tech / music / sport / politics");
+      }
+    }
+
+    // =========================
+    // FEED ACTION (scroll simulation)
+    // =========================
+    function feedAction(action){
+      updateTime();
+
+      state.feedClicks++;
+
+      // costs
+      state.charge = clamp(state.charge - 1.8, 0, 100);
+
+      // degradation grows by feed usage
+      state.degradation = clamp(state.degradation + 2.5, 0, 100);
+
+      const card = state.currentFeedCard;
+
+      if (card?.type === "first-course") {
+        offerFirstCourse();
+        // Next card after pick
+        nextFeedCard();
+        render();
+        return;
+      }
+
+      if (card?.type === "trigger" && card.branch) {
+        unlockBranch(card.branch);
+      }
+
+      // User "scrolls" -> next card (THIS IS THE BUGFIX)
+      nextFeedCard();
+      render();
+    }
+
+    // =========================
+    // TRAIN SKILL (hunger consumed, hunger regenerates over time)
+    // Condition: can train while hunger > 0
+    // =========================
+    function trainSkill(key){
+      if (!state.skills[key]?.unlocked) return;
+
+      if (state.hunger <= 0) {
+        alert("🍔 Ты на нуле. Отдохни — со временем голод восстановится.");
+        return;
+      }
+
+      updateTime();
+
+      // training costs
+      state.hunger = clamp(state.hunger - 1.2, 0, 100);
+      state.charge = clamp(state.charge - 0.6, 0, 100);
+
+      // xp gain reduced by degradation
+      const degrPenalty = state.degradation / 120; // 0..~0.83
+      const eff = clamp(1 - degrPenalty, 0.25, 1.0);
+      const xp = Math.floor((2 + Math.random()*3) * eff); // 2..5 scaled
+      const s = state.skills[key];
+      s.xp += xp;
+
+      const needed = 100 + s.level * 120;
+      if (s.xp >= needed) {
+        s.xp -= needed;
+        s.level += 1;
+        state.level += 1; // global level grows with skill milestones
+        // small money reward (hidden on HOME, visible in STATUS)
+        state.money += 1 + Math.floor(s.level / 2);
+        alert(`🎉 ${getSkillName(key)}: уровень ${s.level}! (+уровень жизни, +$)`);
+      }
+
+      render();
+    }
+
+    // =========================
+    // ADSGRAM REWARD (Food/Charge)
+    // =========================
+    function ensureAdsgram(){
+      return !!(window.Adsgram && typeof window.Adsgram.init === "function");
+    }
+
+    function showAdReward(type){
+      resetDailyAdsIfNeeded();
+
+      // daily limits
+      if (type === "charge" && state.ads.chargeLeft <= 0) { alert("⚡ На сегодня лимит исчерпан."); return; }
+      if (type === "food" && state.ads.foodLeft <= 0) { alert("🍔 На сегодня лимит исчерпан."); return; }
+
+      if (!ensureAdsgram() || !isInsideTelegram()) {
+        alert("Adsgram не загрузился. Проверь, что это запускается внутри Telegram и скрипт доступен.");
+        return;
+      }
+
+      try {
+        const AdController = window.Adsgram.init({ blockId: "21029" });
+
+        AdController.show().then(() => {
+          // success
+          if (type === "charge") {
+            state.charge = clamp(state.charge + 35, 0, 100);
+            state.ads.chargeLeft -= 1;
+            alert("⚡ Спасибо! Заряд восстановлен.");
+          } else {
+            state.hunger = clamp(state.hunger + 35, 0, 100);
+            state.ads.foodLeft -= 1;
+            alert("🍔 Спасибо! Голод восстановлен.");
+          }
+          render();
+        }).catch((result) => {
+          console.log("Ad skipped/error:", result);
+          // no reward
+        });
+      } catch (e) {
+        console.log(e);
+        alert("Adsgram не загрузился. Проверь, что это запускается внутри Telegram и скрипт доступен.");
+      }
+    }
+
+    // =========================
+    // RENDER
+    // =========================
+    function renderTopStatus(){
+      // HOME requires ONLY: hunger/charge/level. We'll keep same everywhere for consistency.
+      return `
+        <div class="top-status" onclick="navigate('status')">
+          <div class="status-item"><span class="status-icon">🍔</span><span>${Math.floor(state.hunger)}%</span></div>
+          <div class="status-item"><span class="status-icon">🔋</span><span>${Math.floor(state.charge)}%</span></div>
+          <div class="status-item"><span class="status-icon">⭐</span><span>${state.level}</span></div>
         </div>
-        <div class="action-area">
-          <button class="main-btn" ${!canOpen ? "disabled":""} onclick="openFeed()">
-            ${canOpen ? "ОТКРЫТЬ ЛЕНТУ" : "Недостаточно заряда"}
+      `;
+    }
+
+    function renderNav(){
+      return `
+        <div class="nav">
+          <button class="nav-item ${state.screen==='home'?'active':''}" onclick="navigate('home')">
+            <div class="nav-icon">🏠</div>HOME
+          </button>
+          <button class="nav-item ${state.screen==='feed'?'active':''}" onclick="navigate('feed')">
+            <div class="nav-icon">📱</div>ЛЕНТА
+          </button>
+          <button class="nav-item ${state.screen==='status'?'active':''}" onclick="navigate('status')">
+            <div class="nav-icon">📊</div>СТАТУС
+          </button>
+          <button class="nav-item ${state.screen==='business'?'active':''}" onclick="navigate('business')">
+            <div class="nav-icon">🏢</div>БИЗНЕС
           </button>
         </div>
-      </div>
-      ${renderNav()}
-    `;
+      `;
+    }
 
-  } else if (state.screen === "feed") {
-    // отдельный “экран ленты” (вместо overlay можно оставить overlay, но тут удобно по меню)
-    app.innerHTML = `
-      <div class="screen">
-        <div class="title">Лента</div>
-        <div class="card">
-          <h3>Как работает</h3>
-          <div class="muted">
-            Лента = хаос, деградация, триггеры и возможности. Открывай её на HOME.
-          </div>
-          <button class="main-btn" style="margin-top:1rem" onclick="openFeed()">Открыть ленту</button>
-        </div>
-      </div>
-      ${renderNav()}
-    `;
+    function renderPhone(){
+      ensureFeedCard();
 
-  } else if (state.screen === "status") {
-    const boostOn = Date.now() < state.incomeBoostUntil;
-    app.innerHTML = `
-      <div class="screen">
-        <div class="title">Статус</div>
+      if (state.phoneTab === "feed") {
+        const card = state.currentFeedCard;
 
-        <div class="card">
-          <h3>Жизнь</h3>
-          <div class="pillrow">
-            <div class="pill">⭐ Уровень: ${state.level}</div>
-            <div class="pill">🏠 Дом: ${state.home === "none" ? "картонка" : (state.home === "basement" ? "подвал" : state.home)}</div>
-            <div class="pill">💰 Деньги: ${state.money}$</div>
-            <div class="pill">🧠 Деградация: ${Math.floor(state.degradation)}%</div>
-            <div class="pill">🎯 Концентрация: ${Math.floor(state.concentration)}%</div>
-            <div class="pill">🌪️ Хаос: ${Math.floor(state.chaos)}%</div>
-            <div class="pill">🏆 Авторитет: ${Math.floor(state.authority)}%</div>
-          </div>
-          <div class="muted" style="margin-top:.8rem">
-            ${boostOn
-              ? `🔥 Буст дохода активен: x${state.incomeBoostMult.toFixed(1)} ещё ${fmtTimeLeft(state.incomeBoostUntil)}`
-              : "Бустов нет. Попробуй Crypto Guess (появляется в ленте)."}
-          </div>
-        </div>
+        let buttons = "";
+        if (card.type === "first-course") {
+          buttons = `<button class="feed-btn trigger" onclick="feedAction('open')">ВЫБРАТЬ КУРС</button>`;
+        } else if (card.type === "trigger") {
+          buttons = `<button class="feed-btn trigger" onclick="feedAction('open')">ОТКРЫТЬ</button>`;
+        } else if (state.degradation < 30) {
+          buttons = `
+            <button class="feed-btn" onclick="feedAction('ok')">ПРИКОЛЬНО</button>
+            <button class="feed-btn" onclick="feedAction('ok')">ЯСНО</button>
+            <button class="feed-btn" onclick="feedAction('ok')">ПОНЯТНО</button>
+          `;
+        } else if (state.degradation < 60) {
+          buttons = `
+            <button class="feed-btn" onclick="feedAction('ok')">ПРИКОЛЬНО</button>
+            <button class="feed-btn" onclick="feedAction('deg')">ФА</button>
+            <button class="feed-btn" onclick="feedAction('deg')">ПЭПЭ</button>
+          `;
+        } else {
+          buttons = `
+            <button class="feed-btn" onclick="feedAction('deg')">ФА</button>
+            <button class="feed-btn" onclick="feedAction('deg')">ПЭПЭ</button>
+            <button class="feed-btn" onclick="feedAction('deg')">ШНЕЛЯ</button>
+          `;
+        }
 
-        <div class="card">
-          <h3>Навыки</h3>
-          ${renderSkillsList()}
-          <button class="main-btn" style="margin-top:.9rem" onclick="trainSelectedSkill()">Прокачать выбранный навык</button>
-          <div class="muted" style="margin-top:.7rem">
-            В будущем сюда добавим “работы 100 кликов = $”, требования дома/одежды и т.д.
-          </div>
-        </div>
+        return `
+          <div class="phone">
+            <div class="phone-notch"></div>
 
-        <div class="card">
-          <h3>Реклама (бонусы)</h3>
-          <div class="muted">Можно смотреть рекламу и получать заряд/еду.</div>
-          <div style="display:flex;gap:.6rem;margin-top:1rem">
-            <button class="feed-btn primary" style="flex:1" onclick="showAdReward('charge')">🎥 ⚡ Заряд</button>
-            <button class="feed-btn primary" style="flex:1" onclick="showAdReward('food')">🎥 🍔 Еда</button>
-          </div>
-          <div class="muted" style="margin-top:.7rem">
-            Осталось сегодня: ⚡ ${state.adsChargeLeft} / 🍔 ${state.adsFoodLeft}
-          </div>
-        </div>
-
-      </div>
-      ${renderNav()}
-    `;
-
-  } else if (state.screen === "business") {
-    app.innerHTML = `
-      <div class="screen">
-        <div class="title">Бизнес</div>
-        <div class="card">
-          <h3>Скоро</h3>
-          <div class="muted">
-            Бизнес откроется позже и будет бесконечно масштабироваться (еженедельно добавляются новые бизнесы).
-          </div>
-        </div>
-      </div>
-      ${renderNav()}
-    `;
-  }
-
-  // Feed overlay (phone)
-  if (state.showPhone) {
-    ensureFeedCard();
-    const overlay = document.createElement("div");
-    overlay.className = "overlay";
-    overlay.innerHTML = renderPhone();
-    app.appendChild(overlay);
-  }
-
-  // Course picker
-  if (state.showCoursePicker) {
-    const overlay = document.createElement("div");
-    overlay.className = "overlay";
-    overlay.innerHTML = `
-      <div class="phone" style="height:640px">
-        <div class="phone-notch"></div>
-        <button class="close-phone" onclick="state.showCoursePicker=false; render()">✕</button>
-        <div class="phone-content">
-          <div class="feed-card" style="justify-content:flex-start">
-            <div class="feed-emoji">🎓</div>
-            <div class="feed-text"><b>Бесплатный курс!</b><br>Выбери направление.</div>
-            <div style="display:flex;flex-direction:column;gap:.6rem">
-              ${courses.map(c => `
-                <button class="feed-btn primary" onclick="chooseCourse('${c.key}')">
-                  ${c.emoji} ${c.name}
-                </button>
-              `).join("")}
+            <div class="phone-tabs">
+              <div class="tab-btn ${state.phoneTab==='feed'?'active':''}" onclick="switchPhoneTab('feed')">Лента</div>
+              <div class="tab-btn ${state.phoneTab==='skills'?'active':''}" onclick="switchPhoneTab('skills')">Навыки</div>
             </div>
-            <div class="feed-hint" style="margin-top:1rem">
-              Ты не выбираешь из меню — ты натыкаешься на шанс в ленте.
+
+            <button class="close-phone" onclick="closePhone()">✕</button>
+
+            <div class="phone-content">
+              <div class="feed-card">
+                <div class="feed-emoji">${card.emoji}</div>
+                <div class="feed-text">${card.text}</div>
+                <div class="feed-btns">${buttons}</div>
+              </div>
+
+              <div class="feed-hint">
+                ${state.degradation > 65 ? "Голова гудит..." :
+                  state.degradation > 35 ? "Ты листаешь снова." :
+                  state.charge < 20 ? "Экран тускнеет." : "Время идёт."}
+              </div>
+
+              <div class="tiny-note">
+                Клик по кнопке = «скролл». Карточка меняется только после твоего действия.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // skills tab inside phone
+      const unlocked = Object.entries(state.skills).filter(([_, s]) => s.unlocked);
+      const icons = { tech:"💻", music:"🎵", sport:"🏋️", politics:"🏛️" };
+
+      return `
+        <div class="phone">
+          <div class="phone-notch"></div>
+
+          <div class="phone-tabs">
+            <div class="tab-btn ${state.phoneTab==='feed'?'active':''}" onclick="switchPhoneTab('feed')">Лента</div>
+            <div class="tab-btn ${state.phoneTab==='skills'?'active':''}" onclick="switchPhoneTab('skills')">Навыки</div>
+          </div>
+
+          <button class="close-phone" onclick="closePhone()">✕</button>
+
+          <div class="phone-content">
+            ${unlocked.length ? unlocked.map(([key, s]) => {
+              const needed = 100 + s.level * 120;
+              const pct = needed > 0 ? clamp((s.xp / needed) * 100, 0, 100) : 0;
+              const canTrain = state.hunger > 0 && state.charge > 0;
+              return `
+                <div class="skill-card">
+                  <div class="skill-row">
+                    <div class="skill-left">
+                      <div class="skill-emoji">${icons[key]}</div>
+                      <div>
+                        <div class="skill-name">${getSkillName(key)}</div>
+                        <div class="skill-sub">Ур. ${s.level} • XP ${Math.floor(s.xp)} / ${needed}</div>
+                      </div>
+                    </div>
+                    <button class="skill-btn ${state.selectedCourse===key?'primary':''}" onclick="state.selectedCourse='${key}'; render();">
+                      ${state.selectedCourse===key ? "Выбран" : "Выбрать"}
+                    </button>
+                  </div>
+                  <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+                  <button class="train-btn" ${canTrain ? "" : "disabled"} onclick="trainSkill('${key}')">
+                    ${canTrain ? "Прокачать (клик)" : "Нужен голод/заряд"}
+                  </button>
+                  <div class="tiny-note">
+                    Прокачка тратит голод и заряд. Голод восстанавливается со временем.
+                  </div>
+                </div>
+              `;
+            }).join("") : `
+              <div class="feed-card">
+                <div class="feed-emoji">🔒</div>
+                <div class="feed-text">Навыки закрыты. Найди бесплатный курс в ленте.</div>
+                <div class="feed-btns">
+                  <button class="feed-btn trigger" onclick="switchPhoneTab('feed')">В ЛЕНТУ</button>
+                </div>
+              </div>
+            `}
+
+            <div class="tiny-note">
+              Подсказка: чем больше деградации, тем хуже эффективность прокачки.
             </div>
           </div>
         </div>
-      </div>
-    `;
-    app.appendChild(overlay);
-  }
-}
+      `;
+    }
 
-function renderTopBar() {
-  const hunger = pctBar(hungerShown());
-  const charge = pctBar(state.charge);
+    function render(){
+      updateTime();
+      save();
 
-  return `
-    <div class="top-bar">
-      <div class="top-item">🍔 <span>${hunger}%</span>
-        <span class="bar"><div style="width:${hunger}%;background:${state.hunger>75?"#ff4444":"#00ff88"}"></div></span>
-      </div>
-      <div class="top-item">🔋 <span>${charge}%</span>
-        <span class="bar"><div style="width:${charge}%"></div></span>
-      </div>
-      <div class="top-item">⭐ <span>${state.level}</span></div>
-    </div>
-  `;
-}
+      const app = document.getElementById("app");
 
-function renderHomeQuick() {
-  return `
-    <div class="home-quick">
-      <button class="qbtn" onclick="freeCharge()">⚡ <span>Кафе</span> <small>(x${state.freeChargeLeft})</small></button>
-      <button class="qbtn" onclick="freeFood()">🍔 <span>Кафе</span> <small>(x${state.freeFoodLeft})</small></button>
-      <button class="qbtn" onclick="showAdReward('charge')">🎥⚡ <span>Реклама</span> <small>(x${state.adsChargeLeft})</small></button>
-      <button class="qbtn" onclick="showAdReward('food')">🎥🍔 <span>Реклама</span> <small>(x${state.adsFoodLeft})</small></button>
-    </div>
-  `;
-}
+      // ONBOARDING
+      if (state.screen === "onboarding") {
+        if (state.step === 0) {
+          app.innerHTML = `<div class="onboarding"><div class="onboarding-text">Ты решил заняться трейдингом…</div></div>`;
+          setTimeout(()=>{ state.step=1; render(); }, 1500);
+        } else if (state.step === 1) {
+          app.innerHTML = `
+            <div class="onboarding">
+              <div class="notification-box">
+                <div class="notification"><div class="notif-title">Биржа</div><div class="notif-text">Маржин-колл</div></div>
+                <div class="notification"><div class="notif-title">Биржа</div><div class="notif-text">Ликвидация</div></div>
+                <div class="notification"><div class="notif-title">Telegram</div><div class="notif-text">Бро, ты жив?</div></div>
+                <div class="notification"><div class="notif-title">Баланс</div><div class="notif-text">0.00</div></div>
+              </div>
+            </div>
+          `;
+          setTimeout(()=>{ state.step=2; render(); }, 2400);
+        } else if (state.step === 2) {
+          app.innerHTML = `<div class="onboarding"><div class="onboarding-text">…и рынок решил иначе.</div></div>`;
+          setTimeout(()=>{ state.step=3; render(); }, 1500);
+        } else {
+          app.innerHTML = `
+            <div class="onboarding">
+              <div style="font-size:6rem; margin-bottom:1.4rem;">📦</div>
+              <div class="onboarding-text">Добро пожаловать обратно в реальность.</div>
+              <div style="font-size:.92rem; color:#666; margin-top:.6rem;">Зато опыт есть. 😄</div>
+              <button class="start-btn" onclick="startGame()">Начать заново</button>
+            </div>
+          `;
+        }
+        return;
+      }
 
-function renderSkillsList() {
-  const keys = Object.keys(state.skills);
-  const unlocked = keys.filter(k => state.skills[k].unlocked);
-  if (!unlocked.length) {
-    return `<div class="muted">Навыки ещё не открыты. Открой ленту и найди бесплатный курс.</div>`;
-  }
-  return unlocked.map(k => {
-    const s = state.skills[k];
-    const need = 100 + s.level*120;
-    const pct = Math.round((s.xp/need)*100);
-    const isSel = (state.selectedCourse === k);
-    return `
-      <div class="card" style="background:#171717;border-color:#2a2a2a;margin-top:.6rem">
-        <h3>${isSel ? "✅ " : ""}${skillName(k)}</h3>
-        <div class="muted">Уровень: <b>${s.level}</b> · XP: ${Math.floor(s.xp)} / ${need}</div>
-        <div style="height:8px;background:#333;border-radius:999px;overflow:hidden;margin-top:.7rem">
-          <div style="height:100%;width:${clamp(pct,0,100)}%;background:#00ff88"></div>
-        </div>
-        <div style="display:flex;gap:.6rem;margin-top:.9rem">
-          <button class="feed-btn ${isSel ? "primary":""}" onclick="state.selectedCourse='${k}';render()">
-            ${isSel ? "Выбран" : "Выбрать"}
-          </button>
-          <button class="feed-btn" onclick="alert('Дальше: задания/работы/требования дома и одежды — добавим следующим шагом')">
-            Детали
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
+      // HOME
+      if (state.screen === "home") {
+        const scene = scenes[state.home] || scenes.none;
+        const canOpen = state.charge > 3;
 
-function renderPhone() {
-  const card = state.currentFeedCard;
+        app.innerHTML = `
+          ${state.showFirstHint ? `<div class="top-hint">📱 Открой ленту — там появляются шансы</div>` : ""}
+          ${renderTopStatus()}
 
-  // кнопки зависят от деградации (оставляем только деградационные слова, как ты хотел)
-  let buttons = "";
-  if (card.type === "first-course") {
-    buttons = `<button class="feed-btn primary" onclick="feedClick('course')">ВЫБРАТЬ КУРС</button>`;
-  } else if (card.type === "trigger") {
-    buttons = `<button class="feed-btn primary" onclick="feedClick('open')">ОТКРЫТЬ</button>`;
-  } else if (card.type === "crypto") {
-    buttons = `<button class="feed-btn primary" onclick="feedClick('crypto')">ПОПРОБОВАТЬ</button>`;
-  } else {
-    buttons = `
-      <button class="feed-btn" onclick="feedClick('fa')">ФА</button>
-      <button class="feed-btn" onclick="feedClick('pepe')">ПЭПЭ</button>
-      <button class="feed-btn" onclick="feedClick('schnela')">ШНЕЛЯ</button>
-    `;
-  }
+          <div class="scene">
+            <div class="scene-content">
+              <div class="scene-title">${scene.title}</div>
+              <div class="scene-desc">${scene.desc}</div>
+              <div class="scene-hint">
+                ${state.charge < 15 ? "⚡ Экран тускнеет." :
+                  state.hunger < 15 ? "🍔 Слабость… отдохни." :
+                  state.degradation > 60 ? "🤯 Мозг в кашу." :
+                  scene.hint}
+              </div>
+            </div>
+          </div>
 
-  const hint = state.degradation > 60 ? "Голова гудит…"
-    : state.degradation > 30 ? "Ты листаешь снова."
-    : state.charge < 30 ? "Экран тускнеет."
-    : "Время идёт.";
+          <div class="action-area">
+            <button class="main-btn" ${!canOpen ? "disabled" : ""} onclick="openPhone()">
+              ${canOpen ? "ОТКРЫТЬ ЛЕНТУ" : "Недостаточно заряда"}
+            </button>
+          </div>
 
-  // Crypto mini overlay inside phone (optional)
-  const cryptoPanel = state.showCrypto ? `
-    <div class="feed-card" style="margin-top:.8rem;border-color:rgba(0,255,136,.25)">
-      <div class="feed-emoji">📉</div>
-      <div class="feed-text"><b>Crypto Guess</b><br>BTC сегодня?</div>
-      <div class="feed-btns">
-        <button class="feed-btn primary" onclick="cryptoGuess('up')">⬆ Вверх</button>
-        <button class="feed-btn primary" onclick="cryptoGuess('down')">⬇ Вниз</button>
-      </div>
-      <div class="feed-hint">${state.cryptoStreak>0 ? `Серия: ${state.cryptoStreak} 🔥` : "А вдруг сегодня твой день 😏"}</div>
-    </div>` : "";
+          ${renderNav()}
+        `;
+      }
 
-  return `
-    <div class="phone">
-      <div class="phone-notch"></div>
-      <button class="close-phone" onclick="closeFeed()">✕</button>
+      // FEED screen (opens phone immediately)
+      if (state.screen === "feed") {
+        // A separate screen that immediately shows phone overlay
+        app.innerHTML = `
+          ${renderTopStatus()}
+          <div class="content-screen">
+            <div class="screen-title">Лента</div>
+            <div class="card">
+              <div class="card-header">СМЫСЛ</div>
+              <div class="card-value">Жизнь начинается из ленты.</div>
+              <div class="card-desc">Тут появляются курсы, триггеры и «деградация».</div>
+              <div style="margin-top:1rem;">
+                <button class="main-btn" onclick="openPhone()">ОТКРЫТЬ</button>
+              </div>
+            </div>
+          </div>
+          ${renderNav()}
+        `;
+        // keep phone closed until user taps
+      }
 
-      <div class="phone-content">
-        <div class="feed-card">
-          <div class="feed-emoji">${card.emoji}</div>
-          <div class="feed-text">${card.text}</div>
-          <div class="feed-btns">${buttons}</div>
-          <div class="feed-hint" style="margin-top:1rem">${hint}</div>
-        </div>
-        ${cryptoPanel}
-      </div>
-    </div>
-  `;
-}
+      // STATUS (shows everything + ads reward buttons)
+      if (state.screen === "status") {
+        const unlocked = Object.entries(state.skills).filter(([_, s]) => s.unlocked);
+        const role =
+          state.level < 5  ? "Уличный новичок" :
+          state.level < 15 ? "Начинающий" :
+          state.level < 30 ? "Опытный" : "Икона";
 
-function renderNav() {
-  const active = (s) => state.screen === s ? "active" : "";
-  const locked = state.screen === "business" ? "active" : "";
+        app.innerHTML = `
+          ${renderTopStatus()}
+          <div class="content-screen">
+            <div class="screen-title">Статус</div>
 
-  return `
-    <div class="nav">
-      <button class="nav-item ${active("home")}" onclick="navigate('home')">
-        <div class="nav-icon">🏠</div>HOME
-      </button>
-      <button class="nav-item ${active("feed")}" onclick="navigate('feed')">
-        <div class="nav-icon">📱</div>ЛЕНТА
-      </button>
-      <button class="nav-item ${active("status")}" onclick="navigate('status')">
-        <div class="nav-icon">📊</div>СТАТУС
-      </button>
-      <button class="nav-item ${locked}" onclick="navigate('business')">
-        <div class="nav-icon">🏢</div>БИЗНЕС
-      </button>
-    </div>
-  `;
-}
+            <div class="card">
+              <div class="card-header">КТО ТЫ</div>
+              <div class="card-value">${role}</div>
+              <div class="card-desc">
+                ${state.home === "none"
+                  ? "Без дома. Но ты держишься."
+                  : "У тебя есть крыша. Это многое меняет."}
+              </div>
+            </div>
 
-/** ============================
- *  INIT + TICK
- *  ============================ */
-window.onload = () => {
-  loadState();
-  ensureDailyReset();
-  render();
+            <div class="card">
+              <div class="card-header">ФИНАНСЫ (НЕ НА HOME)</div>
+              <div class="card-value">${state.money}$</div>
+              <div class="card-desc">На главном экране деньги скрыты принципиально.</div>
+            </div>
 
-  // Плавный таймер нужд — но НЕ трогаем ленту/карточки
-  setInterval(() => {
-    if (state.screen === "onboarding") return;
-    const now = Date.now();
-    const deltaSec = (now - state.lastUpdate) / 1000;
-    state.lastUpdate = now;
+            <div class="card">
+              <div class="card-header">НАВЫКИ</div>
+              <div class="card-desc">
+                ${unlocked.length
+                  ? unlocked.map(([k,s]) => `• ${getSkillName(k)}: ур. ${s.level}`).join("<br>")
+                  : "Пока нет. Открой курс в ленте."}
+              </div>
+            </div>
 
-    tickNeeds(deltaSec);
-    saveState();
+            <div class="card">
+              <div class="card-header">РЕКЛАМА → НАГРАДА</div>
+              <div class="card-desc">Можно смотреть рекламу и получать заряд/еду.</div>
+              <div class="ad-reward-wrap">
+                <button class="ad-btn" onclick="showAdReward('charge')">⚡ Заряд</button>
+                <button class="ad-btn" onclick="showAdReward('food')">🍔 Еда</button>
+              </div>
+              <div class="ad-left">
+                Осталось сегодня: ⚡ ${state.ads.chargeLeft} / 🍔 ${state.ads.foodLeft}
+              </div>
+            </div>
+          </div>
+          ${renderNav()}
+        `;
+      }
 
-    // Перерисовываем только HOME/STATUS, чтобы не дёргать overlay
-    if (!state.showPhone && !state.showCoursePicker) render();
-  }, 5000);
-};
-</script>
+      // BUSINESS (placeholder)
+      if (state.screen === "business") {
+        const locked = state.level < 10;
+        app.innerHTML = `
+          ${renderTopStatus()}
+          <div class="content-screen">
+            <div class="screen-title">Бизнес</div>
+            <div class="card">
+              <div class="card-header">${locked ? "ЗАКРЫТО" : "ДОСТУПНО"}</div>
+              <div class="card-value">${locked ? "Нужно вырасти" : "Добро пожаловать"}</div>
+              <div class="card-desc">
+                ${locked
+                  ? "Бизнес откроется позже (например, с уровня 10). Дальше — бесконечная игра: еженедельно добавляется новый бизнес."
+                  : "Тут будет пассивный доход, масштабирование и новые бизнесы каждую неделю."}
+              </div>
+            </div>
+          </div>
+          ${renderNav()}
+        `;
+      }
+
+      // PHONE overlay
+      if (state.showPhone) {
+        const overlay = document.createElement("div");
+        overlay.className = "phone-overlay";
+        overlay.innerHTML = renderPhone();
+        app.appendChild(overlay);
+      }
+    }
+
+    // =========================
+    // BOOT
+    // =========================
+    window.onload = () => {
+      load();
+      resetDailyAdsIfNeeded();
+      render();
+
+      // Passive update
+      setInterval(() => {
+        if (state.screen !== "onboarding" && !state.showPhone) {
+          updateTime();
+          save();
+          // lightweight refresh for top bar changes
+          render();
+        }
+      }, 5000);
+    };
+  </script>
 </body>
 </html>
