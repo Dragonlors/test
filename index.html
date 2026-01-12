@@ -1,1762 +1,965 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Социальный Лифт</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0a;
-            color: #fff;
-            overflow-x: hidden;
-        }
-        
-        #app {
-            max-width: 420px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background: #161616;
-            position: relative;
-        }
-        
-        /* Онбординг */
-        .onboarding {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 2rem;
-            text-align: center;
-        }
-        
-        .onboarding-text {
-            font-size: 1.3rem;
-            margin-bottom: 2rem;
-            animation: fadeIn 1s ease-out;
-        }
-        
-        .notification-box {
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        .notification {
-            background: #1f1f1f;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            margin: 0.5rem 0;
-            border-left: 3px solid #ff4444;
-            animation: slideUp 0.5s ease-out forwards;
-            opacity: 0;
-        }
-        
-        .notification:nth-child(1) { animation-delay: 0.2s; }
-        .notification:nth-child(2) { animation-delay: 0.5s; }
-        .notification:nth-child(3) { animation-delay: 0.8s; }
-        .notification:nth-child(4) { animation-delay: 1.1s; }
-        
-        .notif-title {
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 0.3rem;
-        }
-        
-        .notif-text {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-        
-        .start-btn {
-            margin-top: 2rem;
-            padding: 1.2rem 3rem;
-            background: #00ff88;
-            color: #000;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            animation: slideUp 0.5s ease-out 1.5s forwards;
-            opacity: 0;
-        }
-        
-        .start-btn:active {
-            transform: scale(0.95);
-        }
-        
-        /* Подсказка сверху */
-        .top-hint {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
-            color: #000;
-            padding: 1rem;
-            text-align: center;
-            font-weight: 700;
-            font-size: 0.95rem;
-            z-index: 300;
-            animation: slideDown 0.5s ease-out;
-        }
-        
-        @keyframes slideDown {
-            from {
-                transform: translateY(-100%);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-        
-        /* Обучающий экран */
-        .tutorial-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .tutorial-box {
-            background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
-            border-radius: 20px;
-            padding: 2.5rem;
-            max-width: 360px;
-            width: 100%;
-            border: 2px solid #00ff88;
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
-        }
-        
-        .tutorial-icon {
-            font-size: 4rem;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .tutorial-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 1rem;
-            color: #00ff88;
-        }
-        
-        .tutorial-text {
-            font-size: 1rem;
-            color: #ddd;
-            text-align: center;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
-        
-        .tutorial-highlight {
-            background: rgba(0, 255, 136, 0.1);
-            border-left: 3px solid #00ff88;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-        
-        .tutorial-btn {
-            width: 100%;
-            padding: 1.2rem;
-            background: #00ff88;
-            color: #000;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
-        }
-        
-        .tutorial-btn:active {
-            transform: scale(0.98);
-        }
-        
-        /* Верхний статус */
-        .top-status {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(31, 31, 31, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 0.6rem 1rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            z-index: 200;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            transition: all 0.2s;
-            max-width: 200px;
-        }
-        
-        .top-status:hover {
-            background: rgba(31, 31, 31, 1);
-            border-color: #00ff88;
-        }
-        
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .status-icon {
-            font-size: 0.95rem;
-        }
-        
-        /* Действия и день - ТОЛЬКО НА ГЛАВНОЙ */
-        .top-actions {
-            position: fixed;
-            top: 4.5rem;
-            right: 1rem;
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .action-btn {
-            background: rgba(31, 31, 31, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 0.6rem 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-        }
-        
-        .action-btn:hover:not(:disabled) {
-            border-color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-        }
-        
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .action-btn.cooldown {
-            font-size: 0.7rem;
-            color: #888;
-        }
-        
-        .day-counter {
-            background: rgba(31, 31, 31, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 0.6rem 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        
-        /* Сцена с фото */
-        .scene {
-            min-height: 100vh;
-            background-image: url('https://dragonlors.github.io/test/image/fon1.png');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            padding: 2rem;
-        }
-        
-        .scene::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
-            z-index: 1;
-        }
-        
-        .scene-content {
-            text-align: center;
-            z-index: 2;
-            max-width: 320px;
-            position: relative;
-        }
-        
-        .scene-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
-        }
-        
-        .scene-desc {
-            font-size: 1.05rem;
-            color: #fff;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
-        }
-        
-        .scene-hint {
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-style: italic;
-            color: #ddd;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Кнопка действия */
-        .action-area {
-            position: absolute;
-            bottom: 100px;
-            left: 0;
-            right: 0;
-            padding: 0 1.5rem;
-            z-index: 2;
-        }
-        
-        .main-btn {
-            width: 100%;
-            padding: 1.2rem;
-            background: #00ff88;
-            color: #000;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
-        }
-        
-        .main-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .main-btn:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        
-        /* Крипто челлендж */
-        .crypto {
-            position: absolute;
-            bottom: 220px;
-            left: 1.5rem;
-            right: 1.5rem;
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            z-index: 2;
-        }
-        
-        .crypto-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        
-        .crypto-question {
-            font-size: 1.5rem;
-            font-weight: 800;
-            text-align: center;
-            color: #00ff88;
-            margin-bottom: 1.5rem;
-        }
-        
-        .crypto-btns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        
-        .crypto-btn {
-            padding: 1.2rem;
-            background: rgba(31, 31, 31, 0.8);
-            border: 2px solid #333;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .crypto-btn:hover {
-            border-color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-        }
-        
-        .crypto-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .crypto-cooldown {
-            text-align: center;
-            color: #888;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-        }
-        
-        /* Телефон с лентой */
-        .phone-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .phone {
-            width: 360px;
-            height: 720px;
-            background: #000;
-            border-radius: 40px;
-            border: 8px solid #1a1a1a;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-        }
-        
-        .phone-notch {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 28px;
-            background: #000;
-            border-radius: 0 0 20px 20px;
-            z-index: 10;
-        }
-        
-        .phone-content {
-            height: 100%;
-            overflow-y: auto;
-            padding: 40px 1rem 1rem;
-            scroll-behavior: smooth;
-        }
-        
-        .phone-content::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .feed-card {
-            background: #161616;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #2a2a2a;
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        .feed-emoji {
-            font-size: 3rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        
-        .feed-text {
-            font-size: 1rem;
-            text-align: center;
-            margin-bottom: 1.5rem;
-            line-height: 1.5;
-            color: #ddd;
-        }
-        
-        .feed-btns {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .feed-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border: 2px solid #333;
-            background: transparent;
-            color: #fff;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-        }
-        
-        .feed-btn:hover {
-            background: #222;
-            border-color: #00ff88;
-        }
-        
-        .feed-btn.trigger {
-            background: #00ff88;
-            color: #000;
-            border-color: #00ff88;
-        }
-        
-        .feed-hint {
-            text-align: center;
-            color: #666;
-            font-size: 0.9rem;
-            margin: 1rem 0;
-            font-style: italic;
-        }
-        
-        .close-phone {
-            position: absolute;
-            top: 50px;
-            right: 1rem;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: none;
-            border-radius: 20px;
-            color: #fff;
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 11;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Экраны работы и навыков */
-        .content-screen {
-            padding: 1.5rem;
-            padding-bottom: 100px;
-            padding-top: 5rem;
-            min-height: 100vh;
-        }
-        
-        .screen-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-        }
-        
-        .card {
-            background: #1f1f1f;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #2a2a2a;
-        }
-        
-        .card-header {
-            font-size: 0.85rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .card-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .card-desc {
-            font-size: 0.9rem;
-            color: #888;
-            line-height: 1.5;
-        }
-        
-        .progress {
-            width: 100%;
-            height: 8px;
-            background: #333;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0.8rem 0;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: #00ff88;
-            transition: width 0.5s;
-            border-radius: 4px;
-        }
-        
-        .skill-item, .job-item, .shop-item {
-            margin: 1rem 0;
-            padding: 1.2rem;
-            background: rgba(0, 255, 136, 0.05);
-            border-radius: 12px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        
-        .skill-item:hover, .job-item:hover, .shop-item:hover {
-            border-color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-        }
-        
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .item-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-        
-        .item-level {
-            color: #888;
-            font-size: 0.85rem;
-        }
-        
-        .item-icon {
-            font-size: 1.5rem;
-        }
-        
-        .item-price {
-            color: #00ff88;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-        
-        .empty-state {
-            text-align: center;
-            color: #666;
-            padding: 3rem 2rem;
-            font-size: 1rem;
-        }
-        
-        /* Экран навыка */
-        .skill-screen {
-            padding: 1.5rem;
-            padding-bottom: 100px;
-            padding-top: 5rem;
-            min-height: 100vh;
-        }
-        
-        .skill-top {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .skill-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-        
-        .skill-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-        }
-        
-        .skill-progress {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .skill-lvl {
-            font-size: 3rem;
-            font-weight: 800;
-            color: #00ff88;
-        }
-        
-        .skill-xp {
-            font-size: 1rem;
-            color: #888;
-            margin-top: 0.5rem;
-        }
-        
-        .click-btn {
-            width: 100%;
-            padding: 2rem;
-            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
-            color: #000;
-            border: none;
-            border-radius: 16px;
-            font-size: 1.3rem;
-            font-weight: 800;
-            cursor: pointer;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
-        }
-        
-        .click-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .click-btn:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        
-        .skill-status {
-            text-align: center;
-            color: #888;
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-        
-        .back-btn {
-            display: block;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            border: 2px solid #333;
-            background: transparent;
-            color: #fff;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* Выбор первого курса */
-        .course-selection {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease-out;
-            padding: 2rem;
-        }
-        
-        .course-box {
-            background: #1f1f1f;
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 360px;
-            width: 100%;
-            border: 1px solid #2a2a2a;
-        }
-        
-        .course-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .course-subtitle {
-            font-size: 0.95rem;
-            color: #888;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .course-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-        
-        .course-option {
-            padding: 1.2rem;
-            background: rgba(0, 255, 136, 0.05);
-            border: 2px solid #333;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .course-option:hover {
-            border-color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-        }
-        
-        .course-emoji {
-            font-size: 2rem;
-        }
-        
-        .course-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-        
-        /* Навигация */
-        .nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 420px;
-            width: 100%;
-            background: #1f1f1f;
-            border-top: 1px solid #2a2a2a;
-            display: flex;
-            z-index: 100;
-        }
-        
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.3rem;
-            padding: 0.8rem 0.5rem;
-            border: none;
-            background: transparent;
-            color: #666;
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .nav-item.active {
-            color: #00ff88;
-        }
-        
-        .nav-icon {
-            font-size: 1.5rem;
-        }
-        
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .hidden { display: none !important; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Социальный Лифт</title>
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a; color: #fff; overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    #app { max-width: 420px; margin: 0 auto; min-height: 100vh; background: #161616; position: relative; }
+
+    /* Onboarding */
+    .onboarding {
+      position: fixed; inset: 0; background: #000; z-index: 1000;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      padding: 2rem; text-align: center;
+    }
+    .onboarding-text { font-size: 1.3rem; margin-bottom: 2rem; animation: fadeIn 1s ease-out; }
+    .notification-box { width: 100%; max-width: 300px; }
+    .notification {
+      background: #1f1f1f; padding: 1rem 1.5rem; border-radius: 12px; margin: 0.5rem 0;
+      border-left: 3px solid #ff4444; animation: slideUp 0.5s ease-out forwards; opacity: 0;
+    }
+    .notification:nth-child(1) { animation-delay: 0.2s; }
+    .notification:nth-child(2) { animation-delay: 0.5s; }
+    .notification:nth-child(3) { animation-delay: 0.8s; }
+    .notification:nth-child(4) { animation-delay: 1.1s; }
+    .notif-title { font-size: 0.85rem; color: #888; margin-bottom: 0.3rem; }
+    .notif-text { font-size: 1.1rem; font-weight: 700; }
+    .start-btn {
+      margin-top: 2rem; padding: 1.2rem 3rem; background: #00ff88; color: #000;
+      border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; animation: slideUp 0.5s ease-out 1.5s forwards; opacity: 0;
+    }
+    .start-btn:active { transform: scale(0.95); }
+
+    /* Top hint */
+    .top-hint {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      color: #000; padding: 1rem; text-align: center; font-weight: 800;
+      font-size: 0.95rem; z-index: 300; animation: slideDown 0.5s ease-out;
+    }
+    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+    /* Minimal TOP STATUS (HOME концепт: только 🍔 🔋 ⭐) */
+    .top-status {
+      position: fixed; top: 1rem; right: 1rem;
+      background: rgba(31, 31, 31, 0.92); backdrop-filter: blur(10px);
+      padding: 0.55rem 0.9rem; border-radius: 18px;
+      display: flex; align-items: center; gap: 0.75rem;
+      z-index: 200; border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer; transition: all 0.2s; max-width: 220px;
+    }
+    .top-status:hover { border-color: rgba(0,255,136,0.6); }
+    .status-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 700; }
+    .status-icon { font-size: 0.95rem; }
+
+    /* Scene */
+    .scene {
+      min-height: 100vh;
+      background-image: url('https://dragonlors.github.io/test/image/fon1.png');
+      background-size: cover; background-position: center;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; padding: 2rem;
+    }
+    .scene::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.75) 100%);
+      z-index: 1;
+    }
+    .scene-content { text-align: center; z-index: 2; max-width: 340px; position: relative; }
+    .scene-title { font-size: 2.1rem; font-weight: 900; margin-bottom: 0.9rem; text-shadow: 0 2px 20px rgba(0,0,0,0.8); }
+    .scene-desc { font-size: 1.05rem; color: #fff; line-height: 1.6; margin-bottom: 1.2rem; text-shadow: 0 1px 10px rgba(0,0,0,0.8); }
+    .scene-hint {
+      padding: 1rem; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+      border-radius: 12px; font-size: 0.95rem; font-style: italic; color: #ddd;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Action area */
+    .action-area { position: absolute; bottom: 90px; left: 0; right: 0; padding: 0 1.5rem; z-index: 2; }
+    .main-btn {
+      width: 100%; padding: 1.2rem;
+      background: #00ff88; color: #000; border: none; border-radius: 12px;
+      font-size: 1.1rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,255,136,0.35);
+    }
+    .main-btn:active { transform: scale(0.98); }
+    .main-btn:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; }
+
+    /* Daily Boost (вместо ставок) */
+    .daily {
+      position: absolute; bottom: 210px; left: 1.5rem; right: 1.5rem;
+      background: linear-gradient(135deg, rgba(26,26,46,0.92) 0%, rgba(22,33,62,0.92) 100%);
+      backdrop-filter: blur(18px);
+      border-radius: 16px; padding: 1.2rem; border: 1px solid rgba(0,255,136,0.18);
+      z-index: 2;
+    }
+    .daily-title { font-size: 1.05rem; font-weight: 800; text-align: center; margin-bottom: 0.6rem; }
+    .daily-desc { font-size: 0.95rem; color: #ddd; text-align: center; line-height: 1.5; margin-bottom: 1rem; }
+    .daily-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .daily-btn {
+      padding: 1rem; background: rgba(31,31,31,0.8);
+      border: 2px solid #2b2b2b; border-radius: 12px;
+      font-size: 1rem; font-weight: 800; color: #fff; cursor: pointer; transition: all 0.2s;
+    }
+    .daily-btn:hover { border-color: #00ff88; background: rgba(0,255,136,0.10); }
+    .daily-btn:active { transform: scale(0.97); }
+    .daily-foot { text-align: center; color: #888; font-size: 0.85rem; margin-top: 0.8rem; }
+
+    /* Feed phone overlay */
+    .phone-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+      z-index: 2000; display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .phone {
+      width: 360px; height: 720px; background: #000;
+      border-radius: 40px; border: 8px solid #1a1a1a;
+      position: relative; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.85);
+    }
+    .phone-notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 28px; background: #000; border-radius: 0 0 20px 20px; z-index: 10;
+    }
+    .phone-content { height: 100%; overflow-y: auto; padding: 40px 1rem 1rem; scroll-behavior: smooth; }
+    .phone-content::-webkit-scrollbar { display: none; }
+    .feed-card {
+      background: #161616; border-radius: 16px; padding: 1.4rem; margin-bottom: 1rem;
+      border: 1px solid #2a2a2a; animation: slideUp 0.25s ease-out;
+    }
+    .feed-emoji { font-size: 3rem; text-align: center; margin-bottom: 1rem; }
+    .feed-text { font-size: 1rem; text-align: center; margin-bottom: 1.2rem; line-height: 1.5; color: #ddd; }
+    .feed-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .feed-btn {
+      flex: 1; min-width: 95px;
+      padding: 0.8rem; border: 2px solid #333; background: transparent; color: #fff;
+      border-radius: 10px; font-weight: 800; cursor: pointer; transition: all 0.2s; font-size: 0.85rem;
+    }
+    .feed-btn:hover { background: #222; border-color: #00ff88; }
+    .feed-btn.trigger { background: #00ff88; color: #000; border-color: #00ff88; }
+    .feed-hint { text-align: center; color: #666; font-size: 0.9rem; margin: 0.6rem 0 0.2rem; font-style: italic; }
+    .close-phone {
+      position: absolute; top: 50px; right: 1rem; width: 40px; height: 40px;
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+      border: none; border-radius: 20px; color: #fff; font-size: 1.5rem;
+      cursor: pointer; z-index: 11; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Content screens */
+    .content-screen { padding: 1.5rem; padding-bottom: 100px; padding-top: 5rem; min-height: 100vh; }
+    .screen-title { font-size: 1.7rem; font-weight: 900; margin-bottom: 1.2rem; }
+    .card { background: #1f1f1f; border-radius: 16px; padding: 1.3rem; margin-bottom: 1rem; border: 1px solid #2a2a2a; }
+    .card-header { font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; font-weight: 800; }
+    .card-value { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.4rem; }
+    .card-desc { font-size: 0.9rem; color: #9a9a9a; line-height: 1.5; }
+    .progress { width: 100%; height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin: 0.8rem 0; }
+    .progress-fill { height: 100%; background: #00ff88; transition: width 0.4s; border-radius: 4px; }
+
+    /* Skill screen */
+    .skill-screen { padding: 1.5rem; padding-bottom: 100px; padding-top: 5rem; min-height: 100vh; }
+    .skill-top { text-align: center; margin-bottom: 1.5rem; }
+    .skill-icon { font-size: 4rem; margin-bottom: 0.6rem; }
+    .skill-title { font-size: 1.7rem; font-weight: 900; }
+    .skill-progress { text-align: center; margin-bottom: 1.2rem; }
+    .skill-lvl { font-size: 3rem; font-weight: 950; color: #00ff88; }
+    .skill-xp { font-size: 1rem; color: #888; margin-top: 0.4rem; }
+    .click-btn {
+      width: 100%; padding: 1.6rem;
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      color: #000; border: none; border-radius: 16px;
+      font-size: 1.25rem; font-weight: 950; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,255,136,0.28);
+    }
+    .click-btn:active { transform: scale(0.97); }
+    .click-btn:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; }
+    .skill-status { text-align: center; color: #888; font-size: 0.9rem; margin: 0.9rem 0 1.2rem; }
+    .back-btn {
+      display: block; margin: 0 auto; padding: 1rem 2rem;
+      border: 2px solid #333; background: transparent; color: #fff;
+      border-radius: 10px; font-weight: 800; cursor: pointer;
+    }
+
+    /* Course selection */
+    .course-selection {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2500;
+      display: flex; align-items: center; justify-content: center; padding: 2rem; animation: fadeIn 0.25s ease-out;
+    }
+    .course-box { background: #1f1f1f; border-radius: 20px; padding: 2rem; max-width: 360px; width: 100%; border: 1px solid #2a2a2a; }
+    .course-title { font-size: 1.45rem; font-weight: 950; text-align: center; margin-bottom: 0.4rem; }
+    .course-subtitle { font-size: 0.95rem; color: #888; text-align: center; margin-bottom: 1.4rem; }
+    .course-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .course-option {
+      padding: 1.1rem; background: rgba(0,255,136,0.05); border: 2px solid #333; border-radius: 12px;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 1rem;
+    }
+    .course-option:hover { border-color: #00ff88; background: rgba(0,255,136,0.10); }
+    .course-emoji { font-size: 2rem; }
+    .course-name { font-weight: 900; font-size: 1.05rem; }
+
+    /* Nav (по концепту: HOME / FEED / STATUS / BUSINESS(позже)) */
+    .nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      max-width: 420px; width: 100%; background: #1f1f1f;
+      border-top: 1px solid #2a2a2a; display: flex; z-index: 100;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+      padding: 0.75rem 0.5rem; border: none; background: transparent;
+      color: #666; cursor: pointer; font-size: 0.72rem; font-weight: 900; transition: all 0.2s;
+    }
+    .nav-item.active { color: #00ff88; }
+    .nav-item.locked { opacity: 0.45; }
+    .nav-icon { font-size: 1.5rem; }
+
+    .hidden { display: none !important; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
+
 <body>
-    <div id="app"></div>
+  <div id="app"></div>
 
-    <script>
-        // Состояние игры
-        const state = {
-            step: 0,
-            screen: 'onboarding',
-            hunger: 0, // Старт с полной сытостью
-            charge: 100, // Полный заряд
-            money: 10, // Стартовый баланс 10$
-            level: 1,
-            day: 1,
-            degradation: 0,
-            concentration: 50,
-            chaos: 30,
-            fatigue: 0,
-            feedClicks: 0, // Счётчик кликов в ленте
-            showFirstHint: false,
-            home: 'none',
-            currentSkill: null,
-            currentJob: null,
-            firstCourseOffered: false,
-            showTutorial: false,
-            tutorialStep: 0,
-            selectedCourse: null,
-            skills: {
-                tech: { level: 0, xp: 0, unlocked: false },
-                music: { level: 0, xp: 0, unlocked: false },
-                sport: { level: 0, xp: 0, unlocked: false },
-                politics: { level: 0, xp: 0, unlocked: false }
-            },
-            jobs: [],
-            cryptoAvailable: false,
-            cryptoDate: null,
-            cryptoStreak: 0,
-            showPhone: false,
-            showCourseSelection: false,
-            lastCharge: null,
-            lastEat: null,
-            lastUpdate: Date.now()
-        };
+  <script>
+    // =============================
+    // Telegram init
+    // =============================
+    const tg = window.Telegram?.WebApp;
+    try {
+      tg?.ready();
+      tg?.expand();
+      // tg?.disableVerticalSwipes?.(); // если доступно
+    } catch (e) {}
 
-        // Контент
-        const scenes = {
-            none: {
-                title: 'Улица',
-                desc: 'Ты сидишь на картонке у кафе. В руках телефон. Рядом розетка.',
-                hint: 'Заряжаешь телефон и думаешь, что делать дальше.'
-            },
-            basement: {
-                title: 'Подвал',
-                desc: 'Сырой подвал с лампой. Но это твоё место.',
-                hint: 'Можно спокойно работать и учиться.'
-            }
-        };
+    const tgUserId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : null;
+    const STORAGE_KEY = tgUserId ? `socialLift_${tgUserId}` : 'socialLift_local';
 
-        const feedData = {
-            trash: [
-                { text: '15 лайфхаков как стать миллионером за неделю', emoji: '💸' },
-                { text: 'Топ-10 самых смешных мемов про котиков', emoji: '😹' },
-                { text: 'Этот трюк шокирует даже врачей!', emoji: '😱' },
-                { text: 'Подпишись на курс «Успех за 3 дня»', emoji: '🎯' },
-                { text: 'Смотри как он танцует! Невероятно!', emoji: '🕺' },
-                { text: 'Гороскоп: тебя ждёт удача... может быть', emoji: '🔮' },
-                { text: 'Залипательное видео: краска сохнет', emoji: '🎨' },
-                { text: 'Купи курс у эксперта с 2 месяцами опыта', emoji: '🤡' }
-            ],
-            neutral: [
-                { text: 'Милый котик играет с коробкой', emoji: '🐱' },
-                { text: 'Рецепт идеальной пасты карбонара', emoji: '🍝' },
-                { text: 'Красивый закат над городом', emoji: '🌇' },
-                { text: 'Смешная реклама нового автомобиля', emoji: '🚗' },
-                { text: 'Как правильно заваривать чай', emoji: '☕' },
-                { text: 'Интересные факты о космосе', emoji: '🌌' }
-            ],
-            triggers: [
-                { text: 'Продвинутый курс: веб-разработка', emoji: '💻', branch: 'tech' },
-                { text: 'Открытая тренировка в качалке рядом', emoji: '🏋️', branch: 'sport' },
-                { text: 'Музыкальный баттл сегодня вечером', emoji: '🎵', branch: 'music' },
-                { text: 'Требуются помощники на митинг', emoji: '🏛️', branch: 'politics' },
-                { text: 'Набор в IT-буткемп (бесплатно)', emoji: '💻', branch: 'tech' },
-                { text: 'Уличные тренировки: присоединяйся', emoji: '🏋️', branch: 'sport' }
-            ]
-        };
+    // =============================
+    // State (старт по концепту)
+    // =============================
+    const defaultState = {
+      step: 0,
+      screen: 'onboarding',
 
-        const courses = [
-            { key: 'tech', emoji: '💻', name: 'Основы программирования', desc: 'Технологии' },
-            { key: 'music', emoji: '🎵', name: 'Музыкальная теория', desc: 'Музыка' },
-            { key: 'sport', emoji: '🏋️', name: 'Фитнес и тренировки', desc: 'Спорт' },
-            { key: 'politics', emoji: '🏛️', name: 'Основы политологии', desc: 'Политика' }
-        ];
+      // HOME-концепт: на главной только ощущения
+      hunger: 75,       // 0..100 (чем больше — тем хуже)
+      charge: 22,       // 0..100
+      level: 1,
 
-        const shopItems = [
-            { id: 'food', name: 'Еда', emoji: '🍔', price: 1, effect: 'hunger' },
-            { id: 'charge', name: 'Зарядить телефон', emoji: '⚡', price: 1, effect: 'charge' }
-        ];
+      // Экономика/прочее — не показываем на HOME
+      money: 0,
+      day: 1,
 
-        // Утилиты
-        function save() {
-            localStorage.setItem('socialLift', JSON.stringify(state));
+      // деградация + контекст
+      degradation: 0,   // 0..100
+      concentration: 55,
+      chaos: 25,
+      fatigue: 0,
+
+      // лента
+      feedClicks: 0,
+      showPhone: false,
+      showCourseSelection: false,
+      firstCourseOffered: false,
+
+      // прогресс
+      home: 'none',
+      currentSkill: null,
+      skills: {
+        tech: { level: 0, xp: 0, unlocked: false },
+        music: { level: 0, xp: 0, unlocked: false },
+        sport: { level: 0, xp: 0, unlocked: false },
+        politics: { level: 0, xp: 0, unlocked: false }
+      },
+
+      // daily boost вместо ставок
+      dailyBoostAvailable: false,
+      dailyBoostDate: null,
+      boostMult: 1.0,
+      boostUntil: 0,
+
+      // бесплатки в день (кафе)
+      freeEatLeft: 1,
+      freeChargeLeft: 2,
+
+      // системное время
+      lastUpdate: Date.now(),
+      dayProgressSec: 0  // накопитель для смены дня
+    };
+
+    const state = structuredClone(defaultState);
+
+    // =============================
+    // Content
+    // =============================
+    const scenes = {
+      none: {
+        title: 'Улица',
+        desc: 'Ты сидишь на картонке у кафе. В руках телефон. Где-то рядом розетка и Wi-Fi.',
+        hint: 'Пока держишься. Но голод и заряд — это таймер.'
+      },
+      basement: {
+        title: 'Подвал',
+        desc: 'Сырой подвал с лампой. Ничего лишнего. Но это твоё место.',
+        hint: 'Тут проще учиться и работать.'
+      }
+    };
+
+    const feedData = {
+      trash: [
+        { text: '15 лайфхаков как стать миллионером за неделю', emoji: '💸' },
+        { text: 'Топ-10 мемов, которые сломают тебе мозг', emoji: '🧠' },
+        { text: 'Этот трюк шокирует даже врачей!', emoji: '😱' },
+        { text: 'Курс «Успех за 3 дня». Скидка 99%', emoji: '🎯' },
+        { text: 'Залипательное: краска сохнет 8 часов', emoji: '🎨' },
+        { text: 'Эксперт с опытом 2 месяца научит жизни', emoji: '🤡' }
+      ],
+      neutral: [
+        { text: 'Рецепт простой еды из того, что есть', emoji: '🍝' },
+        { text: 'Как быстро зарядить телефон в городе', emoji: '⚡' },
+        { text: 'Интересные факты: мозг и привычки', emoji: '🌌' },
+        { text: 'Смешная реклама какого-то сервиса', emoji: '🚗' }
+      ],
+      triggers: [
+        { text: 'Бесплатный курс: веб-разработка', emoji: '💻', branch: 'tech' },
+        { text: 'Открытая тренировка рядом', emoji: '🏋️', branch: 'sport' },
+        { text: 'Музыкальный баттл во дворе', emoji: '🎵', branch: 'music' },
+        { text: 'Нужны помощники на мероприятие', emoji: '🏛️', branch: 'politics' }
+      ]
+    };
+
+    const courses = [
+      { key: 'tech', emoji: '💻', name: 'Основы технологий', desc: 'Технологии' },
+      { key: 'music', emoji: '🎵', name: 'Музыка и ритм', desc: 'Музыка' },
+      { key: 'sport', emoji: '🏋️', name: 'База спорта', desc: 'Спорт' },
+      { key: 'politics', emoji: '🏛️', name: 'База политики/права', desc: 'Политика' }
+    ];
+
+    // =============================
+    // Utils
+    // =============================
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function load() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        Object.assign(state, parsed);
+        state.lastUpdate = Date.now();
+      } catch (e) {}
+    }
+
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+    function getSkillName(key) {
+      return { tech: 'Технологии', music: 'Музыка', sport: 'Спорт', politics: 'Политика' }[key] || key;
+    }
+
+    function computeLevel() {
+      const sum = Object.values(state.skills).reduce((acc, s) => acc + (s.level || 0), 0);
+      // уровень жизни: базовый 1 + сумма уровней навыков/2
+      state.level = Math.max(1, 1 + Math.floor(sum / 2));
+    }
+
+    function moodHint() {
+      if (state.charge < 10) return '⚡ Экран почти умер.';
+      if (state.hunger > 85) return '🍔 Живот урчит.';
+      if (state.degradation > 65) return 'Голова гудит...';
+      if (state.degradation > 35) return 'Ты листаешь снова.';
+      return scenes[state.home]?.hint || 'Время идёт.';
+    }
+
+    // =============================
+    // Time system (только тут!)
+    // =============================
+    const DAY_SECONDS = 5 * 60; // 5 минут = 1 день (можешь поменять)
+
+    function updateTimeTick() {
+      const now = Date.now();
+      const deltaSec = (now - state.lastUpdate) / 1000;
+      state.lastUpdate = now;
+
+      // базовые изменения
+      state.hunger = clamp(state.hunger + deltaSec * 0.20, 0, 100); // растёт голод
+      state.charge = clamp(state.charge - deltaSec * 0.12, 0, 100); // падает заряд
+
+      // спад деградации медленно
+      if (state.degradation > 0) state.degradation = clamp(state.degradation - deltaSec * 0.02, 0, 100);
+
+      // boost таймер
+      if (state.boostUntil && Date.now() > state.boostUntil) {
+        state.boostMult = 1.0;
+        state.boostUntil = 0;
+      }
+
+      // дневной цикл
+      state.dayProgressSec += deltaSec;
+      if (state.dayProgressSec >= DAY_SECONDS) {
+        state.dayProgressSec = 0;
+        state.day++;
+        // бесплатки обновляются каждый день
+        state.freeEatLeft = 1;
+        state.freeChargeLeft = 2;
+        // daily boost снова доступен каждый новый день
+        state.dailyBoostAvailable = true;
+        state.dailyBoostDate = null;
+      }
+    }
+
+    // =============================
+    // Feed generation (стабильно)
+    // =============================
+    let currentFeedCard = null;
+
+    function generateFeedCard() {
+      // Гарантированный первый курс после 5 тапов в ленте
+      if (!state.firstCourseOffered && state.feedClicks >= 5) {
+        return { type: 'first-course', emoji: '🎓', text: 'Ты находишь бесплатный курс… Выбери направление.' };
+      }
+
+      const rand = Math.random() * 100;
+      const trashMod = state.degradation * 0.35;
+      const triggerChance = clamp(18 - state.degradation * 0.10, 6, 18);
+
+      if (rand < 50 + trashMod) {
+        const item = feedData.trash[Math.floor(Math.random() * feedData.trash.length)];
+        return { ...item, type: 'trash' };
+      }
+      if (rand < 80 + trashMod) {
+        const item = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
+        return { ...item, type: 'neutral' };
+      }
+      if (rand < 80 + trashMod + triggerChance) {
+        const item = feedData.triggers[Math.floor(Math.random() * feedData.triggers.length)];
+        return { ...item, type: 'trigger' };
+      }
+      const item = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
+      return { ...item, type: 'neutral' };
+    }
+
+    // =============================
+    // Actions
+    // =============================
+    function startGame() {
+      state.step = 0;
+      state.screen = 'home';
+      state.showFirstHint = true;
+      setTimeout(() => { state.showFirstHint = false; render(); }, 4500);
+      render();
+    }
+
+    function navigate(screen) {
+      state.screen = screen;
+      state.showPhone = false;
+      render();
+    }
+
+    function openPhone() {
+      if (state.charge < 4) return;
+      state.showPhone = true;
+      render();
+    }
+
+    function closePhone() {
+      state.showPhone = false;
+      render();
+    }
+
+    function openCourseSelection() {
+      state.showCourseSelection = true;
+      render();
+    }
+
+    function selectCourse(key) {
+      state.showCourseSelection = false;
+      state.skills[key].unlocked = true;
+      state.currentSkill = key;
+      state.firstCourseOffered = true;
+      computeLevel();
+      closePhone();
+      render();
+      alert(`🎯 Открыто направление: ${getSkillName(key)}!`);
+    }
+
+    function feedTap(action) {
+      // стоимость тапа по ленте
+      state.feedClicks++;
+      state.charge = clamp(state.charge - 2.2, 0, 100);
+      state.degradation = clamp(state.degradation + 2.4, 0, 100);
+      state.concentration = clamp(state.concentration - 0.6, 0, 100);
+      state.chaos = clamp(state.chaos + 1.2, 0, 100);
+
+      const card = currentFeedCard;
+
+      // карточки
+      if (card?.type === 'first-course') {
+        openCourseSelection();
+        return;
+      }
+
+      // trigger: открывает ветку навыка
+      if (card?.type === 'trigger' && card.branch) {
+        if (!state.skills[card.branch].unlocked) {
+          state.skills[card.branch].unlocked = true;
+          alert(`🎯 Открыт путь: ${getSkillName(card.branch)}!`);
         }
+      }
 
-        function load() {
-            const saved = localStorage.getItem('socialLift');
-            if (saved) {
-                Object.assign(state, JSON.parse(saved));
-                state.lastUpdate = Date.now();
-            }
-        }
+      render();
+    }
 
-        function getSkillName(key) {
-            const names = { tech: 'Технологии', music: 'Музыка', sport: 'Спорт', politics: 'Политика' };
-            return names[key];
-        }
+    function openSkill(key) {
+      state.currentSkill = key;
+      state.screen = 'skill';
+      render();
+    }
 
-        // Кулдауны
-        function canCharge() {
-            if (!state.lastCharge) return true;
-            const elapsed = Date.now() - state.lastCharge;
-            return elapsed >= 30 * 60 * 1000;
-        }
+    function clickSkill() {
+      // блок по голоду (как ты хотел: голод — тормозит/блокирует)
+      if (state.hunger > 30) {
+        alert('🍔 Слишком голодно. Найди еду (бесплатно в кафе 1 раз в день) или дождись нового дня.');
+        return;
+      }
+      if (state.charge < 3) {
+        alert('⚡ Телефон почти разряжен. Зарядись в кафе (2 раза в день) или подожди новый день.');
+        return;
+      }
 
-        function canEat() {
-            if (!state.lastEat) return true;
-            const elapsed = Date.now() - state.lastEat;
-            return elapsed >= 30 * 60 * 1000;
-        }
+      const skill = state.skills[state.currentSkill];
+      // эффективность: деградация мешает
+      const efficiency = clamp(1 - (state.degradation / 160), 0.35, 1);
 
-        function getTimeLeft(lastTime) {
-            const elapsed = Date.now() - lastTime;
-            const remaining = (30 * 60 * 1000) - elapsed;
-            const minutes = Math.ceil(remaining / 60000);
-            return minutes > 0 ? `${minutes}м` : '0м';
-        }
+      // XP с учётом буста (Daily Boost)
+      let xp = Math.floor((2 + Math.random() * 3) * efficiency * state.boostMult);
+      if (xp < 1) xp = 1;
 
-        // Действия - ТОЛЬКО БЕСПЛАТНЫЕ
-        function chargePhone() {
-            if (!canCharge()) return;
-            state.charge = 100;
-            state.lastCharge = Date.now();
-            render();
-        }
+      skill.xp += xp;
 
-        function eatFood() {
-            if (!canEat()) return;
-            state.hunger = Math.max(0, state.hunger - 75);
-            state.lastEat = Date.now();
-            render();
-        }
+      // стоимость клика
+      state.charge = clamp(state.charge - 1.0, 0, 100);
+      state.hunger = clamp(state.hunger + 0.9, 0, 100);
+      state.fatigue = clamp(state.fatigue + 0.3, 0, 100);
 
-        // Магазин - ПЛАТНЫЕ действия
-        function buyItem(itemId) {
-            const item = shopItems.find(i => i.id === itemId);
-            if (!item || state.money < item.price) {
-                alert('Недостаточно денег!');
-                return;
-            }
-            
-            state.money -= item.price;
-            
-            if (item.effect === 'hunger') {
-                state.hunger = Math.max(0, state.hunger - 75);
-                alert('🍔 Ты поел! Сытость восстановлена.');
-            } else if (item.effect === 'charge') {
-                state.charge = 100;
-                alert('⚡ Телефон заряжен!');
-            }
-            
-            render();
-        }
+      // level up
+      const needed = skill.level * 80 + 80; // быстрее ранние уровни
+      if (skill.xp >= needed) {
+        skill.xp -= needed;
+        skill.level++;
+        computeLevel();
+        alert(`🎉 Уровень навыка: ${getSkillName(state.currentSkill)} → ${skill.level}`);
+        // на 3 уровне откроем Daily Boost как “внутриигровую активность”
+        if (skill.level >= 3) state.dailyBoostAvailable = true;
+      }
 
-        // Игровое время
-        function updateTime() {
-            const now = Date.now();
-            const delta = (now - state.lastUpdate) / 1000;
-            state.lastUpdate = now;
-            
-            state.hunger = Math.min(100, state.hunger + delta * 0.3);
-            state.charge = Math.max(0, state.charge - delta * 0.2);
-            
-            if (state.degradation > 0) {
-                state.degradation = Math.max(0, state.degradation - delta * 0.05);
-            }
-        }
+      render();
+    }
 
-        function generateFeed() {
-            // 5-й клик = первый курс
-            if (state.feedClicks === 4 && !state.firstCourseOffered) {
-                return {
-                    text: 'Бесплатный курс по...',
-                    emoji: '🎓',
-                    type: 'first-course'
-                };
-            }
-            
-            const rand = Math.random() * 100;
-            const trashMod = state.degradation * 0.3;
-            const triggerMod = Math.max(0, 15 - state.degradation * 0.1);
-            
-            if (rand < 50 + trashMod) {
-                const item = feedData.trash[Math.floor(Math.random() * feedData.trash.length)];
-                return { ...item, type: 'trash' };
-            } else if (rand < 75 + trashMod) {
-                const item = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
-                return { ...item, type: 'neutral' };
-            } else if (rand < 90 + trashMod - triggerMod) {
-                const item = feedData.triggers[Math.floor(Math.random() * feedData.triggers.length)];
-                return { ...item, type: 'trigger' };
-            } else {
-                const item = feedData.neutral[Math.floor(Math.random() * feedData.neutral.length)];
-                return { ...item, type: 'neutral' };
-            }
-        }
+    // бесплатки (кафе)
+    function freeCharge() {
+      if (state.freeChargeLeft <= 0) return;
+      state.charge = 100;
+      state.freeChargeLeft--;
+      render();
+    }
 
-        // Действия
-        function startGame() {
-            state.step = 0;
-            state.screen = 'home';
-            state.showFirstHint = true;
-            setTimeout(() => {
-                state.showFirstHint = false;
-                render();
-            }, 5000);
-            render();
-        }
+    function freeEat() {
+      if (state.freeEatLeft <= 0) return;
+      state.hunger = clamp(state.hunger - 75, 0, 100);
+      state.freeEatLeft--;
+      render();
+    }
 
-        function navigate(screen) {
-            state.screen = screen;
-            state.showPhone = false;
-            render();
-        }
+    // Daily Boost (без ставок): угадай “настроение дня”
+    function dailyBoostPick(pick) {
+      // 1 раз в день
+      const today = `day_${state.day}`;
+      if (state.dailyBoostDate === today) return;
 
-        function openPhone() {
-            if (state.charge < 5) return;
-            state.showPhone = true;
-            render();
-        }
+      // “исход” псевдослучайный, но без денег
+      const actual = Math.random() > 0.5 ? 'focus' : 'chaos';
+      const win = pick === actual;
 
-        function closePhone() {
-            state.showPhone = false;
-            render();
-        }
+      if (win) {
+        // баф на 10 минут: x1.25 или x1.5 редко
+        const rare = Math.random() < 0.08;
+        state.boostMult = rare ? 1.5 : 1.25;
+        state.boostUntil = Date.now() + (10 * 60 * 1000);
+        alert(rare ? '🔥 BOOOST x1.5 на 10 минут!' : '✅ BOOST x1.25 на 10 минут!');
+      } else {
+        state.boostMult = 1.0;
+        state.boostUntil = 0;
+        alert('😵 Сегодня не зашло. Без буста.');
+      }
 
-        function showFirstTutorial() {
-            state.showTutorial = true;
-            state.tutorialStep = 1;
-            render();
-        }
+      state.dailyBoostDate = today;
+      render();
+    }
 
-        function selectCourse(key) {
-            state.selectedCourse = key;
-            state.showCourseSelection = false;
-            state.showTutorial = true;
-            state.tutorialStep = 2;
-            render();
-        }
+    function showStatus() {
+      state.screen = 'status';
+      render();
+    }
 
-        function completeTutorial() {
-            if (state.tutorialStep === 2) {
-                state.skills[state.selectedCourse].unlocked = true;
-                state.currentSkill = state.selectedCourse;
-                state.firstCourseOffered = true;
-                state.showTutorial = false;
-                state.tutorialStep = 0;
-                closePhone();
-                render();
-            }
-        }
+    // =============================
+    // Render helpers
+    // =============================
+    function renderTopStatus() {
+      // HOME принцип: только 🍔 🔋 ⭐
+      const sat = clamp(100 - Math.floor(state.hunger), 0, 100); // сытость
+      return `
+        <div class="top-status" onclick="showStatus()">
+          <div class="status-item"><span class="status-icon">🍔</span><span>${sat}%</span></div>
+          <div class="status-item"><span class="status-icon">🔋</span><span>${Math.floor(state.charge)}%</span></div>
+          <div class="status-item"><span class="status-icon">⭐</span><span>${state.level}</span></div>
+        </div>
+      `;
+    }
 
-        function feedAction(action, card) {
-            updateTime();
-            
-            // Увеличиваем счётчик кликов
-            state.feedClicks++;
-            
-            if (card.type === 'first-course') {
-                showFirstTutorial();
-                return;
-            }
-            
-            state.charge = Math.max(0, state.charge - 2);
-            state.degradation = Math.min(100, state.degradation + 3);
-            state.concentration = Math.max(0, state.concentration - 1);
-            state.chaos = Math.min(100, state.chaos + 2);
-            
-            if (card && card.type === 'trigger' && card.branch) {
-                if (!state.skills[card.branch].unlocked) {
-                    state.skills[card.branch].unlocked = true;
-                    alert(`🎯 Открыт путь: ${getSkillName(card.branch)}!`);
-                }
-            }
-            
-            render();
-        }
+    function renderNav() {
+      const businessLocked = true;
+      return `
+        <div class="nav">
+          <button class="nav-item ${state.screen === 'home' ? 'active' : ''}" onclick="navigate('home')">
+            <div class="nav-icon">🏠</div>HOME
+          </button>
+          <button class="nav-item ${state.showPhone ? 'active' : ''}" onclick="openPhone()">
+            <div class="nav-icon">📱</div>ЛЕНТА
+          </button>
+          <button class="nav-item ${state.screen === 'status' ? 'active' : ''}" onclick="navigate('status')">
+            <div class="nav-icon">📊</div>СТАТУС
+          </button>
+          <button class="nav-item locked" onclick="alert('🏢 Бизнес откроется позже (после дома и статуса)')">
+            <div class="nav-icon">🏢</div>БИЗНЕС
+          </button>
+        </div>
+      `;
+    }
 
-        function openSkill(key) {
-            state.currentSkill = key;
-            state.screen = 'skill';
-            render();
-        }
+    function renderPhone() {
+      currentFeedCard = generateFeedCard();
+      const card = currentFeedCard;
 
-        function clickSkill() {
-            // БЛОКИРОВКА БЕЗ СЫТОСТИ
-            if (state.hunger > 25) {
-                alert('🍔 Слишком голоден! Купи еду в магазине или подожди бесплатное восстановление.');
-                return;
-            }
-            
-            updateTime();
-            
-            const skill = state.skills[state.currentSkill];
-            
-            const degradationPenalty = state.degradation / 150;
-            const hungerPenalty = state.hunger / 200;
-            const efficiency = Math.max(0.2, 1 - degradationPenalty - hungerPenalty);
-            
-            const xp = Math.floor((Math.random() * 3 + 2) * efficiency);
-            skill.xp += xp;
-            
-            const moneyGain = Math.floor(xp / 10);
-            if (moneyGain > 0) {
-                state.money += moneyGain;
-            }
-            
-            state.charge = Math.max(0, state.charge - 0.5);
-            state.hunger = Math.min(100, state.hunger + 0.8);
-            state.fatigue = Math.min(100, state.fatigue + 0.3);
-            
-            const needed = skill.level * 100 + 100;
-            if (skill.xp >= needed) {
-                skill.xp -= needed;
-                skill.level++;
-                state.money += skill.level * 5;
-                
-                if (skill.level === 3 && state.jobs.length === 0) {
-                    state.jobs.push({
-                        id: 'moderation',
-                        name: 'Модерация контента',
-                        income: 50,
-                        skill: state.currentSkill
-                    });
-                    alert(`🎉 Уровень ${skill.level}! Открыта работа: Модерация контента (+${skill.level * 5}$)`);
-                } else {
-                    alert(`🎉 Уровень ${skill.level}! ${getSkillName(state.currentSkill)} (+${skill.level * 5}$)`);
-                }
-                
-                if (skill.level === 5) {
-                    state.cryptoAvailable = true;
-                    alert('📈 Открыт Crypto Challenge!');
-                }
-            }
-            
-            render();
-        }
+      let buttons = '';
+      // деградационные слова как кнопки (только для ленты)
+      const isHigh = state.degradation >= 60;
+      const isMid  = state.degradation >= 30 && state.degradation < 60;
 
-        function cryptoGuess(dir) {
-            const actual = Math.random() > 0.5 ? 'up' : 'down';
-            const win = dir === actual;
-            
-            if (win) {
-                const bonus = Math.random() < 0.05 ? 10 : (Math.random() < 0.1 ? 3 : 1);
-                const xp = 50 * bonus;
-                const moneyBonus = 10 * bonus;
-                
-                if (state.currentSkill) {
-                    state.skills[state.currentSkill].xp += xp;
-                }
-                state.money += moneyBonus;
-                state.cryptoStreak++;
-                alert(bonus > 1 ? `🔥 x${bonus} БОНУС! +${xp} опыта, +${moneyBonus}$!` : `✅ Угадал! +${xp} опыта, +${moneyBonus}$`);
-            } else {
-                state.cryptoStreak = 0;
-                alert('❌ Рынок показал характер.');
-            }
-            
-            state.cryptoDate = new Date().toDateString();
-            render();
-        }
+      if (card.type === 'first-course') {
+        buttons = `<button class="feed-btn trigger" onclick="feedTap('course')">ВЫБРАТЬ</button>`;
+      } else if (card.type === 'trigger') {
+        buttons = `<button class="feed-btn trigger" onclick="feedTap('open')">ОТКРЫТЬ</button>`;
+      } else if (!isMid && !isHigh) {
+        buttons = `
+          <button class="feed-btn" onclick="feedTap('ok')">ЯСНО</button>
+          <button class="feed-btn" onclick="feedTap('cool')">ПРИКОЛЬНО</button>
+          <button class="feed-btn" onclick="feedTap('hmm')">ПОНЯТНО</button>
+        `;
+      } else if (isMid) {
+        buttons = `
+          <button class="feed-btn" onclick="feedTap('fa')">ФА</button>
+          <button class="feed-btn" onclick="feedTap('pepe')">ПЭПЭ</button>
+          <button class="feed-btn" onclick="feedTap('ok')">ЯСНО</button>
+        `;
+      } else {
+        buttons = `
+          <button class="feed-btn" onclick="feedTap('fa')">ФА</button>
+          <button class="feed-btn" onclick="feedTap('pepe')">ПЭПЭ</button>
+          <button class="feed-btn" onclick="feedTap('schnelya')">ШНЕЛЯ</button>
+        `;
+      }
 
-        function showStatus() {
-            state.screen = 'status-detail';
-            render();
-        }
+      return `
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <button class="close-phone" onclick="closePhone()">✕</button>
+          <div class="phone-content">
+            <div class="feed-card">
+              <div class="feed-emoji">${card.emoji}</div>
+              <div class="feed-text">${card.text}</div>
+              <div class="feed-btns">${buttons}</div>
+            </div>
+            <div class="feed-hint">${moodHint()}</div>
+          </div>
+        </div>
+      `;
+    }
 
-        // Рендер
-        function render() {
-            save();
-            const app = document.getElementById('app');
-            
-            // Онбординг
-            if (state.screen === 'onboarding') {
-                if (state.step === 0) {
-                    app.innerHTML = `
-                        <div class="onboarding">
-                            <div class="onboarding-text">Ты решил заняться трейдингом…</div>
-                        </div>
-                    `;
-                    setTimeout(() => { state.step = 1; render(); }, 2000);
-                } else if (state.step === 1) {
-                    app.innerHTML = `
-                        <div class="onboarding">
-                            <div class="notification-box">
-                                <div class="notification">
-                                    <div class="notif-title">Binance</div>
-                                    <div class="notif-text">Маржин-колл</div>
-                                </div>
-                                <div class="notification">
-                                    <div class="notif-title">Binance</div>
-                                    <div class="notif-text">Ликвидация позиции</div>
-                                </div>
-                                <div class="notification">
-                                    <div class="notif-title">Telegram</div>
-                                    <div class="notif-text">Бро, ты жив?</div>
-                                </div>
-                                <div class="notification">
-                                    <div class="notif-title">Баланс</div>
-                                    <div class="notif-text">0.00 USDT</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    setTimeout(() => { state.step = 2; render(); }, 3000);
-                } else if (state.step === 2) {
-                    app.innerHTML = `
-                        <div class="onboarding">
-                            <div class="onboarding-text">…и рынок решил иначе.</div>
-                        </div>
-                    `;
-                    setTimeout(() => { state.step = 3; render(); }, 2000);
-                } else {
-                    app.innerHTML = `
-                        <div class="onboarding">
-                            <div style="font-size: 6rem; margin-bottom: 2rem;">📦</div>
-                            <div class="onboarding-text">Добро пожаловать обратно в реальность.</div>
-                            <div style="font-size: 0.9rem; color: #666; margin-top: 1rem;">
-                                Зато опыт есть. 😄
-                            </div>
-                            <button class="start-btn" onclick="startGame()">Начать заново</button>
-                        </div>
-                    `;
-                }
-                return;
-            }
-            
-            // Экран навыка
-            if (state.screen === 'skill') {
-                const skill = state.skills[state.currentSkill];
-                const needed = skill.level * 100 + 100;
-                const percent = (skill.xp / needed) * 100;
-                const icons = { tech: '💻', music: '🎵', sport: '🏋️', politics: '🏛️' };
-                const canTrain = state.hunger <= 25;
-                
-                app.innerHTML = `
-                    ${renderTopStatus()}
-                    <div class="skill-screen">
-                        <div class="skill-top">
-                            <div class="skill-icon">${icons[state.currentSkill]}</div>
-                            <div class="skill-title">${getSkillName(state.currentSkill)}</div>
-                        </div>
-                        <div class="skill-progress">
-                            <div class="skill-lvl">${skill.level}</div>
-                            <div class="skill-xp">${Math.floor(skill.xp)} / ${needed} опыта</div>
-                            <div class="progress" style="margin-top: 1rem;">
-                                <div class="progress-fill" style="width: ${percent}%"></div>
-                            </div>
-                        </div>
-                        <button class="click-btn" onclick="clickSkill()" ${!canTrain ? 'disabled' : ''}>
-                            ${canTrain ? 'ИЗУЧАТЬ' : '🍔 СЛИШКОМ ГОЛОДЕН'}
-                        </button>
-                        <div class="skill-status">
-                            ${!canTrain ? '⚠️ Нужно поесть! Купи еду в магазине.' :
-                              state.degradation > 50 ? '⚠️ Высокая деградация замедляет обучение' : 
-                              state.charge < 20 ? '⚠️ Заряд на исходе' :
-                              '✓ Продолжай в том же духе'}
-                        </div>
-                        <button class="back-btn" onclick="navigate('skills')">← Назад к навыкам</button>
-                    </div>
-                    ${renderNav()}
-                `;
-                return;
-            }
-            
-            // Детальный статус
-            if (state.screen === 'status-detail') {
-                app.innerHTML = `
-                    ${renderTopStatus()}
-                    <div class="content-screen">
-                        <div class="screen-title">Твой статус</div>
-                        <div class="card">
-                            <div class="card-header">КТО ТЫ</div>
-                            <div class="card-value">
-                                ${state.level < 5 ? 'Уличный новичок' :
-                                  state.level < 15 ? 'Начинающий' : 'Опытный'}
-                            </div>
-                            <div class="card-desc">
-                                ${state.home === 'none' ? 'Без дома. Без денег. С телефоном.' : 'Уже не на улице. Есть прогресс.'}
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">ПАРАМЕТРЫ</div>
-                            <div style="margin: 0.8rem 0;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="color: #888;">Сытость</span>
-                                    <span style="font-weight: 700;">${Math.max(0, 100 - Math.floor(state.hunger))}%</span>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-fill" style="width: ${Math.max(0, 100 - state.hunger)}%; background: ${state.hunger > 25 ? '#ff4444' : '#00ff88'};"></div>
-                                </div>
-                            </div>
-                            <div style="margin: 0.8rem 0;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="color: #888;">Заряд</span>
-                                    <span style="font-weight: 700;">${Math.floor(state.charge)}%</span>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-fill" style="width: ${state.charge}%"></div>
-                                </div>
-                            </div>
-                            <div style="margin: 0.8rem 0;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="color: #888;">Концентрация</span>
-                                    <span style="font-weight: 700;">${Math.floor(state.concentration)}%</span>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-fill" style="width: ${state.concentration}%"></div>
-                                </div>
-                            </div>
-                            <div style="margin: 0.8rem 0;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="color: #888;">Хаос</span>
-                                    <span style="font-weight: 700;">${Math.floor(state.chaos)}%</span>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-fill" style="width: ${state.chaos}%; background: #ff4444;"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="back-btn" style="margin-top: 2rem;" onclick="navigate('home')">← На главную</button>
-                    </div>
-                    ${renderNav()}
-                `;
-                return;
-            }
-            
-            // Магазин
-            if (state.screen === 'shop') {
-                app.innerHTML = `
-                    ${renderTopStatus()}
-                    <div class="content-screen">
-                        <div class="screen-title">Магазин</div>
-                        <div class="card" style="text-align: center;">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
-                            <div style="font-size: 2rem; font-weight: 800; color: #00ff88;">${state.money}$</div>
-                            <div style="font-size: 0.9rem; color: #888;">Твой баланс</div>
-                        </div>
-                        ${shopItems.map(item => `
-                            <div class="shop-item" onclick="buyItem('${item.id}')">
-                                <div class="item-header">
-                                    <div>
-                                        <div class="item-name">${item.name}</div>
-                                        <div class="item-level">${item.effect === 'hunger' ? 'Восстанавливает 75% сытости' : 'Полная зарядка'}</div>
-                                    </div>
-                                    <div>
-                                        <div class="item-icon">${item.emoji}</div>
-                                        <div class="item-price">${item.price}$</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                        <div style="margin-top: 2rem; padding: 1rem; background: rgba(0,255,136,0.1); border-radius: 12px; font-size: 0.9rem; color: #888;">
-                            💡 Зарабатывай деньги изучая навыки и повышая уровень!
-                        </div>
-                    </div>
-                    ${renderNav()}
-                `;
-                return;
-            }
-            
-            // Основные экраны
-            if (state.screen === 'home') {
-                const scene = scenes[state.home];
-                const canOpen = state.charge > 5;
-                const cryptoToday = state.cryptoDate === new Date().toDateString();
-                
-                app.innerHTML = `
-                    ${state.showFirstHint ? '<div class="top-hint">📱 Открой ленту — может есть что-то интересное</div>' : ''}
-                    ${renderTopStatus()}
-                    ${renderActions()}
-                    <div class="scene">
-                        <div class="scene-content">
-                            <div class="scene-title">${scene.title}</div>
-                            <div class="scene-desc">${scene.desc}</div>
-                            <div class="scene-hint">
-                                ${state.charge < 20 ? '⚡ Экран тускнеет.' :
-                                  state.hunger > 70 ? '🍔 Живот урчит.' :
-                                  scene.hint}
-                            </div>
-                        </div>
-                    </div>
-                    ${state.cryptoAvailable && !cryptoToday ? `
-                        <div class="crypto">
-                            <div class="crypto-title">📈 Crypto Challenge</div>
-                            <div class="crypto-question">BTC сегодня?</div>
-                            <div class="crypto-btns">
-                                <button class="crypto-btn" onclick="cryptoGuess('up')">⬆ Вверх</button>
-                                <button class="crypto-btn" onclick="cryptoGuess('down')">⬇ Вниз</button>
-                            </div>
-                            <div class="crypto-cooldown">
-                                ${state.cryptoStreak > 0 ? `Серия: ${state.cryptoStreak} 🔥` : 'А вдруг сегодня твой день 😏'}
-                            </div>
-                        </div>
-                    ` : ''}
-                    <div class="action-area">
-                        <button class="main-btn" ${!canOpen ? 'disabled' : ''} onclick="openPhone()">
-                            ${canOpen ? 'ОТКРЫТЬ ЛЕНТУ' : 'Недостаточно заряда'}
-                        </button>
-                    </div>
-                    ${renderNav()}
-                `;
-            } else if (state.screen === 'skills') {
-                const unlocked = Object.entries(state.skills).filter(([_, s]) => s.unlocked);
-                
-                app.innerHTML = `
-                    ${renderTopStatus()}
-                    <div class="content-screen">
-                        <div class="screen-title">Навыки</div>
-                        ${unlocked.length > 0 ? unlocked.map(([key, skill]) => {
-                            const icons = { tech: '💻', music: '🎵', sport: '🏋️', politics: '🏛️' };
-                            return `
-                                <div class="skill-item" onclick="openSkill('${key}')">
-                                    <div class="item-header">
-                                        <div>
-                                            <div class="item-name">${getSkillName(key)}</div>
-                                            <div class="item-level">Уровень ${skill.level}</div>
-                                        </div>
-                                        <div class="item-icon">${icons[key]}</div>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-fill" style="width: ${(skill.xp / (skill.level * 100 + 100)) * 100}%"></div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('') : `
-                            <div class="empty-state">
-                                Открой навыки через ленту<br>
-                                <button class="main-btn" style="margin-top: 1rem;" onclick="openPhone()">Открыть ленту</button>
-                            </div>
-                        `}
-                    </div>
-                    ${renderNav()}
-                `;
-            } else if (state.screen === 'jobs') {
-                app.innerHTML = `
-                    ${renderTopStatus()}
-                    <div class="content-screen">
-                        <div class="screen-title">Работа</div>
-                        ${state.jobs.length > 0 ? state.jobs.map(job => `
-                            <div class="job-item">
-                                <div class="item-header">
-                                    <div>
-                                        <div class="item-name">${job.name}</div>
-                                        <div class="item-level">Доход: ${job.income}₽/час</div>
-                                    </div>
-                                    <div class="item-icon">💼</div>
-                                </div>
-                            </div>
-                        `).join('') : `
-                            <div class="empty-state">
-                                Прокачай навыки до уровня 3<br>чтобы открыть работу
-                            </div>
-                        `}
-                    </div>
-                    ${renderNav()}
-                `;
-            }
-            
-            // Телефон с лентой
-            if (state.showPhone) {
-                const phoneOverlay = document.createElement('div');
-                phoneOverlay.className = 'phone-overlay';
-                phoneOverlay.innerHTML = renderPhone();
-                app.appendChild(phoneOverlay);
-            }
-            
-            // Выбор курса
-            if (state.showCourseSelection) {
-                const courseOverlay = document.createElement('div');
-                courseOverlay.className = 'course-selection';
-                courseOverlay.innerHTML = `
-                    <div class="course-box">
-                        <div class="course-title">Бесплатный курс!</div>
-                        <div class="course-subtitle">Выбери направление для изучения</div>
-                        <div class="course-list">
-                            ${courses.map(course => `
-                                <div class="course-option" onclick="selectCourse('${course.key}')">
-                                    <div class="course-emoji">${course.emoji}</div>
-                                    <div class="course-name">${course.name}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-                app.appendChild(courseOverlay);
-            }
-            
-            // Обучающие экраны
-            if (state.showTutorial) {
-                const tutorialOverlay = document.createElement('div');
-                tutorialOverlay.className = 'tutorial-overlay';
-                
-                if (state.tutorialStep === 1) {
-                    tutorialOverlay.innerHTML = `
-                        <div class="tutorial-box">
-                            <div class="tutorial-icon">✨</div>
-                            <div class="tutorial-title">Новая возможность!</div>
-                            <div class="tutorial-text">
-                                Теперь у тебя есть шанс изучить что-то новое, что поможет тебе зарабатывать деньги и улучшать свою жизнь.
-                            </div>
-                            <button class="tutorial-btn" onclick="state.showCourseSelection = true; state.showTutorial = false; render();">
-                                Выбрать курс
-                            </button>
-                        </div>
-                    `;
-                } else if (state.tutorialStep === 2) {
-                    const course = courses.find(c => c.key === state.selectedCourse);
-                    tutorialOverlay.innerHTML = `
-                        <div class="tutorial-box">
-                            <div class="tutorial-icon">${course.emoji}</div>
-                            <div class="tutorial-title">${course.desc}</div>
-                            <div class="tutorial-text">
-                                Теперь ты можешь изучать навык <strong>${course.desc}</strong>, чтобы зарабатывать деньги!
-                            </div>
-                            <div class="tutorial-highlight">
-                                💡 <strong>Совет:</strong> Ты всегда можешь параллельно изучить другие навыки, найдя новые курсы в ленте. Деньги можно тратить в магазине на еду и зарядку телефона!
-                            </div>
-                            <button class="tutorial-btn" onclick="completeTutorial()">
-                                Начать обучение
-                            </button>
-                        </div>
-                    `;
-                }
-                
-                app.appendChild(tutorialOverlay);
-            }
+    function render() {
+      save();
+      const app = document.getElementById('app');
+
+      // Onboarding
+      if (state.screen === 'onboarding') {
+        if (state.step === 0) {
+          app.innerHTML = `<div class="onboarding"><div class="onboarding-text">Ты решил заняться трейдингом…</div></div>`;
+          setTimeout(() => { state.step = 1; render(); }, 1600);
+        } else if (state.step === 1) {
+          app.innerHTML = `
+            <div class="onboarding">
+              <div class="notification-box">
+                <div class="notification"><div class="notif-title">Биржа</div><div class="notif-text">Маржин-колл</div></div>
+                <div class="notification"><div class="notif-title">Биржа</div><div class="notif-text">Ликвидация позиции</div></div>
+                <div class="notification"><div class="notif-title">Telegram</div><div class="notif-text">Бро, ты жив?</div></div>
+                <div class="notification"><div class="notif-title">Баланс</div><div class="notif-text">0.00</div></div>
+              </div>
+            </div>
+          `;
+          setTimeout(() => { state.step = 2; render(); }, 2600);
+        } else if (state.step === 2) {
+          app.innerHTML = `<div class="onboarding"><div class="onboarding-text">…и рынок решил иначе.</div></div>`;
+          setTimeout(() => { state.step = 3; render(); }, 1400);
+        } else {
+          app.innerHTML = `
+            <div class="onboarding">
+              <div style="font-size: 6rem; margin-bottom: 2rem;">📦</div>
+              <div class="onboarding-text">Добро пожаловать обратно в реальность.</div>
+              <div style="font-size: 0.9rem; color: #666; margin-top: 1rem;">Зато опыт есть. 😄</div>
+              <button class="start-btn" onclick="startGame()">Начать заново</button>
+            </div>
+          `;
         }
-        
-        function renderTopStatus() {
-            return `
-                <div class="top-status" onclick="showStatus()">
-                    <div class="status-item">
-                        <span class="status-icon">💰</span>
-                        <span>${state.money}$</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-icon">🍔</span>
-                        <span>${Math.max(0, 100 - Math.floor(state.hunger))}%</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-icon">🔋</span>
-                        <span>${Math.floor(state.charge)}%</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-icon">⭐</span>
-                        <span>${state.level}</span>
-                    </div>
+        return;
+      }
+
+      // Skill screen
+      if (state.screen === 'skill') {
+        const skill = state.skills[state.currentSkill];
+        const needed = skill.level * 80 + 80;
+        const percent = clamp((skill.xp / needed) * 100, 0, 100);
+        const icons = { tech: '💻', music: '🎵', sport: '🏋️', politics: '🏛️' };
+        const canTrain = state.hunger <= 30 && state.charge >= 3;
+
+        app.innerHTML = `
+          ${renderTopStatus()}
+          <div class="skill-screen">
+            <div class="skill-top">
+              <div class="skill-icon">${icons[state.currentSkill] || '✨'}</div>
+              <div class="skill-title">${getSkillName(state.currentSkill)}</div>
+            </div>
+
+            <div class="skill-progress">
+              <div class="skill-lvl">${skill.level}</div>
+              <div class="skill-xp">${Math.floor(skill.xp)} / ${needed} опыта</div>
+              <div class="progress" style="margin-top: 1rem;">
+                <div class="progress-fill" style="width: ${percent}%"></div>
+              </div>
+            </div>
+
+            <button class="click-btn" onclick="clickSkill()" ${!canTrain ? 'disabled' : ''}>
+              ${canTrain ? `ИЗУЧАТЬ ${state.boostMult > 1 ? `(x${state.boostMult.toFixed(2)})` : ''}` : 'НУЖНА ЕДА/ЗАРЯД'}
+            </button>
+
+            <div class="skill-status">
+              ${state.hunger > 30 ? '🍔 Голод мешает учиться.' :
+                state.charge < 10 ? '⚡ Заряд на исходе.' :
+                state.degradation > 55 ? '🧠 Деградация тормозит прогресс.' :
+                '✓ Продолжай.'}
+            </div>
+
+            <button class="back-btn" onclick="navigate('status')">← Назад</button>
+          </div>
+          ${renderNav()}
+        `;
+        return;
+      }
+
+      // Status
+      if (state.screen === 'status') {
+        const sat = clamp(100 - Math.floor(state.hunger), 0, 100);
+        const boostActive = state.boostUntil && Date.now() < state.boostUntil;
+
+        const unlocked = Object.entries(state.skills).filter(([k,v]) => v.unlocked);
+        const skillsHtml = unlocked.length ? unlocked.map(([key, s]) => {
+          const needed = s.level * 80 + 80;
+          const percent = clamp((s.xp / needed) * 100, 0, 100);
+          const icon = { tech:'💻', music:'🎵', sport:'🏋️', politics:'🏛️' }[key] || '✨';
+          return `
+            <div class="card" onclick="openSkill('${key}')">
+              <div class="card-header">${icon} ${getSkillName(key)}</div>
+              <div class="card-value">Уровень ${s.level}</div>
+              <div class="progress"><div class="progress-fill" style="width:${percent}%"></div></div>
+              <div class="card-desc">Тапай «Изучать», чтобы расти. Деградация мешает, сытость помогает.</div>
+            </div>
+          `;
+        }).join('') : `
+          <div class="card">
+            <div class="card-header">ПУСТО</div>
+            <div class="card-value">Навыки ещё не открыты</div>
+            <div class="card-desc">Открой ленту и найди бесплатный курс.</div>
+          </div>
+        `;
+
+        app.innerHTML = `
+          ${renderTopStatus()}
+          <div class="content-screen">
+            <div class="screen-title">Статус</div>
+
+            <div class="card">
+              <div class="card-header">КТО ТЫ</div>
+              <div class="card-value">${state.level < 5 ? 'Уличный новичок' : state.level < 15 ? 'Поднимаешься' : 'Уже серьёзно'}</div>
+              <div class="card-desc">${state.home === 'none' ? 'Без дома. Зато есть телефон и шанс.' : 'Уже не на улице.'}</div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">ЖИЗНЬ</div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;">
+                <span style="color:#888;">Сытость</span><span style="font-weight:900;">${sat}%</span>
+              </div>
+              <div class="progress"><div class="progress-fill" style="width:${sat}%;background:${state.hunger>30?'#ff4444':'#00ff88'};"></div></div>
+
+              <div style="display:flex;justify-content:space-between;margin:0.8rem 0 0.4rem;">
+                <span style="color:#888;">Заряд</span><span style="font-weight:900;">${Math.floor(state.charge)}%</span>
+              </div>
+              <div class="progress"><div class="progress-fill" style="width:${state.charge}%;"></div></div>
+
+              <div style="display:flex;justify-content:space-between;margin:0.8rem 0 0.4rem;">
+                <span style="color:#888;">День</span><span style="font-weight:900;">${state.day}</span>
+              </div>
+
+              <div class="card-desc" style="margin-top:0.6rem;">
+                Бесплатно в кафе: ⚡ ${state.freeChargeLeft}/2, 🍔 ${state.freeEatLeft}/1
+              </div>
+
+              <div style="display:flex;gap:0.6rem;margin-top:0.9rem;">
+                <button class="main-btn" style="padding:0.9rem;" onclick="freeCharge()" ${state.freeChargeLeft<=0?'disabled':''}>⚡ Зарядиться</button>
+                <button class="main-btn" style="padding:0.9rem;" onclick="freeEat()" ${state.freeEatLeft<=0?'disabled':''}>🍔 Поесть</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">BOOST</div>
+              <div class="card-value">${boostActive ? `Активен x${state.boostMult.toFixed(2)}` : 'Нет'}</div>
+              <div class="card-desc">
+                ${boostActive ? 'Пока буст активен, опыт растёт быстрее.' : 'Раз в день можно попытаться получить буст на обучение.'}
+              </div>
+            </div>
+
+            <div class="screen-title" style="margin-top:1.4rem;">Навыки</div>
+            ${skillsHtml}
+          </div>
+          ${renderNav()}
+        `;
+        return;
+      }
+
+      // HOME
+      if (state.screen === 'home') {
+        const scene = scenes[state.home] || scenes.none;
+        const canOpen = state.charge >= 4;
+
+        // daily доступен всегда, но 1 раз в день
+        const todayKey = `day_${state.day}`;
+        const dailyUsed = state.dailyBoostDate === todayKey;
+
+        app.innerHTML = `
+          ${state.showFirstHint ? '<div class="top-hint">📱 Открой ленту — жизнь начинается из ленты</div>' : ''}
+          ${renderTopStatus()}
+          <div class="scene">
+            <div class="scene-content">
+              <div class="scene-title">${scene.title}</div>
+              <div class="scene-desc">${scene.desc}</div>
+              <div class="scene-hint">${moodHint()}</div>
+            </div>
+          </div>
+
+          <div class="daily">
+            <div class="daily-title">🧩 Daily Boost</div>
+            <div class="daily-desc">Угадай “настроение дня” и получи буст к опыту на 10 минут.</div>
+            <div class="daily-btns">
+              <button class="daily-btn" onclick="dailyBoostPick('focus')" ${dailyUsed ? 'disabled' : ''}>🧠 Фокус</button>
+              <button class="daily-btn" onclick="dailyBoostPick('chaos')" ${dailyUsed ? 'disabled' : ''}>🌪 Хаос</button>
+            </div>
+            <div class="daily-foot">${dailyUsed ? 'Сегодня уже использовано.' : 'Можно 1 раз в день.'}</div>
+          </div>
+
+          <div class="action-area">
+            <button class="main-btn" ${!canOpen ? 'disabled' : ''} onclick="openPhone()">
+              ${canOpen ? 'ОТКРЫТЬ ЛЕНТУ' : 'Недостаточно заряда'}
+            </button>
+          </div>
+
+          ${renderNav()}
+        `;
+      }
+
+      // overlays
+      if (state.showPhone) {
+        const overlay = document.createElement('div');
+        overlay.className = 'phone-overlay';
+        overlay.innerHTML = renderPhone();
+        app.appendChild(overlay);
+      }
+
+      if (state.showCourseSelection) {
+        const overlay = document.createElement('div');
+        overlay.className = 'course-selection';
+        overlay.innerHTML = `
+          <div class="course-box">
+            <div class="course-title">Бесплатный курс!</div>
+            <div class="course-subtitle">Выбери первое направление</div>
+            <div class="course-list">
+              ${courses.map(c => `
+                <div class="course-option" onclick="selectCourse('${c.key}')">
+                  <div class="course-emoji">${c.emoji}</div>
+                  <div class="course-name">${c.name}</div>
                 </div>
-            `;
-        }
-        
-        function renderActions() {
-            // ТОЛЬКО НА ГЛАВНОЙ СТРАНИЦЕ
-            if (state.screen !== 'home') return '';
-            
-            const chargeAvailable = canCharge();
-            const eatAvailable = canEat();
-            
-            return `
-                <div class="top-actions">
-                    <div class="day-counter">День ${state.day}</div>
-                    <button class="action-btn ${!chargeAvailable ? 'cooldown' : ''}" 
-                            onclick="chargePhone()" 
-                            ${!chargeAvailable ? 'disabled' : ''}>
-                        <span>⚡</span>
-                        <span>${chargeAvailable ? 'Зарядить' : getTimeLeft(state.lastCharge)}</span>
-                    </button>
-                    <button class="action-btn ${!eatAvailable ? 'cooldown' : ''}" 
-                            onclick="eatFood()" 
-                            ${!eatAvailable ? 'disabled' : ''}>
-                        <span>🍔</span>
-                        <span>${eatAvailable ? 'Покушать' : getTimeLeft(state.lastEat)}</span>
-                    </button>
-                </div>
-            `;
-        }
-        
-        function renderPhone() {
-            // ОДНА карточка в ленте
-            const card = generateFeed();
-            
-            let buttons;
-            if (card.type === 'first-course') {
-                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ВЫБРАТЬ КУРС</button>`;
-            } else if (card.type === 'trigger') {
-                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ОТКРЫТЬ</button>`;
-            } else if (state.degradation < 30) {
-                buttons = `
-                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
-                    <button class="feed-btn" onclick='feedAction("clear", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ЯСНО</button>
-                    <button class="feed-btn" onclick='feedAction("get", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПОНЯТНО</button>
-                `;
-            } else if (state.degradation < 60) {
-                buttons = `
-                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
-                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
-                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
-                `;
-            } else {
-                buttons = `
-                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
-                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
-                    <button class="feed-btn" onclick='feedAction("schnela", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ШНЕЛЯ</button>
-                `;
-            }
-            
-            return `
-                <div class="phone">
-                    <div class="phone-notch"></div>
-                    <button class="close-phone" onclick="closePhone()">✕</button>
-                    <div class="phone-content">
-                        <div class="feed-card">
-                            <div class="feed-emoji">${card.emoji}</div>
-                            <div class="feed-text">${card.text}</div>
-                            <div class="feed-btns">${buttons}</div>
-                        </div>
-                        <div class="feed-hint">
-                            ${state.degradation > 60 ? 'Голова гудит...' : 
-                              state.degradation > 30 ? 'Ты листаешь снова.' : 
-                              state.charge < 30 ? 'Экран тускнеет.' :
-                              'Время идёт.'}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderNav() {
-            return `
-                <div class="nav">
-                    <button class="nav-item ${state.screen === 'home' ? 'active' : ''}" onclick="navigate('home')">
-                        <div class="nav-icon">🏠</div>
-                        HOME
-                    </button>
-                    <button class="nav-item ${state.screen === 'skills' ? 'active' : ''}" onclick="navigate('skills')">
-                        <div class="nav-icon">📚</div>
-                        НАВЫКИ
-                    </button>
-                    <button class="nav-item ${state.screen === 'shop' ? 'active' : ''}" onclick="navigate('shop')">
-                        <div class="nav-icon">🛒</div>
-                        МАГАЗИН
-                    </button>
-                    <button class="nav-item ${state.screen === 'jobs' ? 'active' : ''}" onclick="navigate('jobs')">
-                        <div class="nav-icon">💼</div>
-                        РАБОТА
-                    </button>
-                </div>
-            `;
-        }
+              `).join('')}
+            </div>
+          </div>
+        `;
+        app.appendChild(overlay);
+      }
+    }
 
-        // Запуск
-        window.onload = () => {
-            load();
-            render();
-            
-            setInterval(() => {
-                if (state.screen !== 'onboarding' && !state.showTutorial) {
-                    updateTime();
-                    render();
-                }
-            }, 5000);
-        };
-    </script>
+    // expose for inline onclick
+    window.startGame = startGame;
+    window.navigate = navigate;
+    window.openPhone = openPhone;
+    window.closePhone = closePhone;
+    window.feedTap = feedTap;
+    window.openCourseSelection = openCourseSelection;
+    window.selectCourse = selectCourse;
+    window.openSkill = openSkill;
+    window.clickSkill = clickSkill;
+    window.showStatus = showStatus;
+    window.freeCharge = freeCharge;
+    window.freeEat = freeEat;
+    window.dailyBoostPick = dailyBoostPick;
+
+    // =============================
+    // Boot
+    // =============================
+    window.onload = () => {
+      load();
+      // если это первый запуск — включим daily доступ
+      state.dailyBoostAvailable = true;
+
+      render();
+
+      setInterval(() => {
+        if (state.screen !== 'onboarding') {
+          updateTimeTick();
+          computeLevel();
+          render();
+        }
+      }, 1000);
+    };
+  </script>
 </body>
 </html>
