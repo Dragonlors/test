@@ -95,6 +95,31 @@
             transform: scale(0.95);
         }
         
+        /* Подсказка сверху */
+        .top-hint {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #000;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            z-index: 300;
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        
         /* Обучающий экран */
         .tutorial-overlay {
             position: fixed;
@@ -203,7 +228,7 @@
             font-size: 0.95rem;
         }
         
-        /* Действия и день */
+        /* Действия и день - ТОЛЬКО НА ГЛАВНОЙ */
         .top-actions {
             position: fixed;
             top: 4.5rem;
@@ -699,6 +724,13 @@
             transform: scale(0.95);
         }
         
+        .click-btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
         .skill-status {
             text-align: center;
             color: #888;
@@ -852,15 +884,17 @@
         const state = {
             step: 0,
             screen: 'onboarding',
-            hunger: 80,
-            charge: 12,
-            money: 0,
+            hunger: 0, // Старт с полной сытостью
+            charge: 100, // Полный заряд
+            money: 10, // Стартовый баланс 10$
             level: 1,
             day: 1,
             degradation: 0,
             concentration: 50,
             chaos: 30,
             fatigue: 0,
+            feedClicks: 0, // Счётчик кликов в ленте
+            showFirstHint: false,
             home: 'none',
             currentSkill: null,
             currentJob: null,
@@ -936,8 +970,8 @@
         ];
 
         const shopItems = [
-            { id: 'food', name: 'Еда', emoji: '🍔', price: 5, effect: 'hunger' },
-            { id: 'charge', name: 'Зарядить телефон', emoji: '⚡', price: 3, effect: 'charge' }
+            { id: 'food', name: 'Еда', emoji: '🍔', price: 1, effect: 'hunger' },
+            { id: 'charge', name: 'Зарядить телефон', emoji: '⚡', price: 1, effect: 'charge' }
         ];
 
         // Утилиты
@@ -978,7 +1012,7 @@
             return minutes > 0 ? `${minutes}м` : '0м';
         }
 
-        // Действия
+        // Действия - ТОЛЬКО БЕСПЛАТНЫЕ
         function chargePhone() {
             if (!canCharge()) return;
             state.charge = 100;
@@ -988,12 +1022,12 @@
 
         function eatFood() {
             if (!canEat()) return;
-            state.hunger = Math.max(0, state.hunger - 50);
+            state.hunger = Math.max(0, state.hunger - 75);
             state.lastEat = Date.now();
             render();
         }
 
-        // Магазин
+        // Магазин - ПЛАТНЫЕ действия
         function buyItem(itemId) {
             const item = shopItems.find(i => i.id === itemId);
             if (!item || state.money < item.price) {
@@ -1004,8 +1038,8 @@
             state.money -= item.price;
             
             if (item.effect === 'hunger') {
-                state.hunger = Math.max(0, state.hunger - 50);
-                alert('🍔 Ты поел! Голод снижен.');
+                state.hunger = Math.max(0, state.hunger - 75);
+                alert('🍔 Ты поел! Сытость восстановлена.');
             } else if (item.effect === 'charge') {
                 state.charge = 100;
                 alert('⚡ Телефон заряжен!');
@@ -1029,7 +1063,8 @@
         }
 
         function generateFeed() {
-            if (!state.firstCourseOffered) {
+            // 5-й клик = первый курс
+            if (state.feedClicks === 4 && !state.firstCourseOffered) {
                 return {
                     text: 'Бесплатный курс по...',
                     emoji: '🎓',
@@ -1060,7 +1095,11 @@
         function startGame() {
             state.step = 0;
             state.screen = 'home';
-            state.charge = 100;
+            state.showFirstHint = true;
+            setTimeout(() => {
+                state.showFirstHint = false;
+                render();
+            }, 5000);
             render();
         }
 
@@ -1097,7 +1136,6 @@
 
         function completeTutorial() {
             if (state.tutorialStep === 2) {
-                // Завершаем обучение и открываем навык
                 state.skills[state.selectedCourse].unlocked = true;
                 state.currentSkill = state.selectedCourse;
                 state.firstCourseOffered = true;
@@ -1110,6 +1148,9 @@
 
         function feedAction(action, card) {
             updateTime();
+            
+            // Увеличиваем счётчик кликов
+            state.feedClicks++;
             
             if (card.type === 'first-course') {
                 showFirstTutorial();
@@ -1138,6 +1179,12 @@
         }
 
         function clickSkill() {
+            // БЛОКИРОВКА БЕЗ СЫТОСТИ
+            if (state.hunger > 25) {
+                alert('🍔 Слишком голоден! Купи еду в магазине или подожди бесплатное восстановление.');
+                return;
+            }
+            
             updateTime();
             
             const skill = state.skills[state.currentSkill];
@@ -1149,7 +1196,6 @@
             const xp = Math.floor((Math.random() * 3 + 2) * efficiency);
             skill.xp += xp;
             
-            // Деньги за обучение (каждые 10 XP = 1$)
             const moneyGain = Math.floor(xp / 10);
             if (moneyGain > 0) {
                 state.money += moneyGain;
@@ -1163,7 +1209,7 @@
             if (skill.xp >= needed) {
                 skill.xp -= needed;
                 skill.level++;
-                state.money += skill.level * 5; // Бонус за уровень
+                state.money += skill.level * 5;
                 
                 if (skill.level === 3 && state.jobs.length === 0) {
                     state.jobs.push({
@@ -1281,10 +1327,10 @@
                 const needed = skill.level * 100 + 100;
                 const percent = (skill.xp / needed) * 100;
                 const icons = { tech: '💻', music: '🎵', sport: '🏋️', politics: '🏛️' };
+                const canTrain = state.hunger <= 25;
                 
                 app.innerHTML = `
                     ${renderTopStatus()}
-                    ${renderActions()}
                     <div class="skill-screen">
                         <div class="skill-top">
                             <div class="skill-icon">${icons[state.currentSkill]}</div>
@@ -1297,15 +1343,18 @@
                                 <div class="progress-fill" style="width: ${percent}%"></div>
                             </div>
                         </div>
-                        <button class="click-btn" onclick="clickSkill()">ИЗУЧАТЬ</button>
+                        <button class="click-btn" onclick="clickSkill()" ${!canTrain ? 'disabled' : ''}>
+                            ${canTrain ? 'ИЗУЧАТЬ' : '🍔 СЛИШКОМ ГОЛОДЕН'}
+                        </button>
                         <div class="skill-status">
-                            ${state.degradation > 50 ? '⚠️ Высокая деградация замедляет обучение' : 
-                              state.hunger > 70 ? '⚠️ Голод снижает эффективность' :
+                            ${!canTrain ? '⚠️ Нужно поесть! Купи еду в магазине.' :
+                              state.degradation > 50 ? '⚠️ Высокая деградация замедляет обучение' : 
                               state.charge < 20 ? '⚠️ Заряд на исходе' :
                               '✓ Продолжай в том же духе'}
                         </div>
                         <button class="back-btn" onclick="navigate('skills')">← Назад к навыкам</button>
                     </div>
+                    ${renderNav()}
                 `;
                 return;
             }
@@ -1314,7 +1363,6 @@
             if (state.screen === 'status-detail') {
                 app.innerHTML = `
                     ${renderTopStatus()}
-                    ${renderActions()}
                     <div class="content-screen">
                         <div class="screen-title">Твой статус</div>
                         <div class="card">
@@ -1331,11 +1379,11 @@
                             <div class="card-header">ПАРАМЕТРЫ</div>
                             <div style="margin: 0.8rem 0;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="color: #888;">Голод</span>
-                                    <span style="font-weight: 700;">${Math.floor(state.hunger)}%</span>
+                                    <span style="color: #888;">Сытость</span>
+                                    <span style="font-weight: 700;">${Math.max(0, 100 - Math.floor(state.hunger))}%</span>
                                 </div>
                                 <div class="progress">
-                                    <div class="progress-fill" style="width: ${state.hunger}%; background: #ff4444;"></div>
+                                    <div class="progress-fill" style="width: ${Math.max(0, 100 - state.hunger)}%; background: ${state.hunger > 25 ? '#ff4444' : '#00ff88'};"></div>
                                 </div>
                             </div>
                             <div style="margin: 0.8rem 0;">
@@ -1377,7 +1425,6 @@
             if (state.screen === 'shop') {
                 app.innerHTML = `
                     ${renderTopStatus()}
-                    ${renderActions()}
                     <div class="content-screen">
                         <div class="screen-title">Магазин</div>
                         <div class="card" style="text-align: center;">
@@ -1390,7 +1437,7 @@
                                 <div class="item-header">
                                     <div>
                                         <div class="item-name">${item.name}</div>
-                                        <div class="item-level">${item.effect === 'hunger' ? 'Снижает голод на 50%' : 'Полная зарядка'}</div>
+                                        <div class="item-level">${item.effect === 'hunger' ? 'Восстанавливает 75% сытости' : 'Полная зарядка'}</div>
                                     </div>
                                     <div>
                                         <div class="item-icon">${item.emoji}</div>
@@ -1415,6 +1462,7 @@
                 const cryptoToday = state.cryptoDate === new Date().toDateString();
                 
                 app.innerHTML = `
+                    ${state.showFirstHint ? '<div class="top-hint">📱 Открой ленту — может есть что-то интересное</div>' : ''}
                     ${renderTopStatus()}
                     ${renderActions()}
                     <div class="scene">
@@ -1453,7 +1501,6 @@
                 
                 app.innerHTML = `
                     ${renderTopStatus()}
-                    ${renderActions()}
                     <div class="content-screen">
                         <div class="screen-title">Навыки</div>
                         ${unlocked.length > 0 ? unlocked.map(([key, skill]) => {
@@ -1484,7 +1531,6 @@
             } else if (state.screen === 'jobs') {
                 app.innerHTML = `
                     ${renderTopStatus()}
-                    ${renderActions()}
                     <div class="content-screen">
                         <div class="screen-title">Работа</div>
                         ${state.jobs.length > 0 ? state.jobs.map(job => `
@@ -1601,6 +1647,9 @@
         }
         
         function renderActions() {
+            // ТОЛЬКО НА ГЛАВНОЙ СТРАНИЦЕ
+            if (state.screen !== 'home') return '';
+            
             const chargeAvailable = canCharge();
             const eatAvailable = canEat();
             
@@ -1624,10 +1673,32 @@
         }
         
         function renderPhone() {
-            const cards = [];
-            for (let i = 0; i < 5; i++) {
-                const card = generateFeed();
-                if (card) cards.push(card);
+            // ОДНА карточка в ленте
+            const card = generateFeed();
+            
+            let buttons;
+            if (card.type === 'first-course') {
+                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ВЫБРАТЬ КУРС</button>`;
+            } else if (card.type === 'trigger') {
+                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ОТКРЫТЬ</button>`;
+            } else if (state.degradation < 30) {
+                buttons = `
+                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
+                    <button class="feed-btn" onclick='feedAction("clear", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ЯСНО</button>
+                    <button class="feed-btn" onclick='feedAction("get", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПОНЯТНО</button>
+                `;
+            } else if (state.degradation < 60) {
+                buttons = `
+                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
+                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
+                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
+                `;
+            } else {
+                buttons = `
+                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
+                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
+                    <button class="feed-btn" onclick='feedAction("schnela", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ШНЕЛЯ</button>
+                `;
             }
             
             return `
@@ -1635,40 +1706,11 @@
                     <div class="phone-notch"></div>
                     <button class="close-phone" onclick="closePhone()">✕</button>
                     <div class="phone-content">
-                        ${cards.map(card => {
-                            let buttons;
-                            if (card.type === 'first-course') {
-                                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ВЫБРАТЬ КУРС</button>`;
-                            } else if (card.type === 'trigger') {
-                                buttons = `<button class="feed-btn trigger" onclick='feedAction("open", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ОТКРЫТЬ</button>`;
-                            } else if (state.degradation < 30) {
-                                buttons = `
-                                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
-                                    <button class="feed-btn" onclick='feedAction("clear", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ЯСНО</button>
-                                    <button class="feed-btn" onclick='feedAction("get", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПОНЯТНО</button>
-                                `;
-                            } else if (state.degradation < 60) {
-                                buttons = `
-                                    <button class="feed-btn" onclick='feedAction("cool", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПРИКОЛЬНО</button>
-                                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
-                                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
-                                `;
-                            } else {
-                                buttons = `
-                                    <button class="feed-btn" onclick='feedAction("fa", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ФА</button>
-                                    <button class="feed-btn" onclick='feedAction("pepe", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ПЭПЭ</button>
-                                    <button class="feed-btn" onclick='feedAction("schnela", ${JSON.stringify(card).replace(/'/g, "&apos;")})'>ШНЕЛЯ</button>
-                                `;
-                            }
-                            
-                            return `
-                                <div class="feed-card">
-                                    <div class="feed-emoji">${card.emoji}</div>
-                                    <div class="feed-text">${card.text}</div>
-                                    <div class="feed-btns">${buttons}</div>
-                                </div>
-                            `;
-                        }).join('')}
+                        <div class="feed-card">
+                            <div class="feed-emoji">${card.emoji}</div>
+                            <div class="feed-text">${card.text}</div>
+                            <div class="feed-btns">${buttons}</div>
+                        </div>
                         <div class="feed-hint">
                             ${state.degradation > 60 ? 'Голова гудит...' : 
                               state.degradation > 30 ? 'Ты листаешь снова.' : 
@@ -1709,7 +1751,7 @@
             render();
             
             setInterval(() => {
-                if (state.screen !== 'onboarding') {
+                if (state.screen !== 'onboarding' && !state.showTutorial) {
                     updateTime();
                     render();
                 }
